@@ -1,0 +1,29 @@
+name: lint
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    clippy:
+        name: Lint
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Install Clippy
+              run: rustup component add clippy
+
+            - name: Run Clippy
+              run: cargo clippy --all-features -- -D warnings
+
+            - name: Install Rustfmt
+              run: rustup component add rustfmt
+
+            - name: Run Rustfmt
+              run: cargo fmt --all -- --check
