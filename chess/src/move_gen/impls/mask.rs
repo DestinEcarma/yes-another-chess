@@ -77,17 +77,12 @@ impl MoveGen {
 	fn ray(bitboard: Bitboard, mut square: Square, direction: Direction) -> Bitboard {
 		let mut ray = Bitboard::default();
 
-		loop {
-			match !(direction == square) {
-				true => {
-					square += direction;
-					ray |= square;
+		while !(direction == square) {
+			square += direction;
+			ray |= square;
 
-					if bitboard.occupied(square) {
-						break;
-					}
-				}
-				false => break,
+			if bitboard.occupied(square) {
+				break;
 			}
 		}
 

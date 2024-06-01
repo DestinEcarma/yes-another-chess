@@ -128,7 +128,7 @@ impl Chess {
 			let from = m.from();
 			let to = m.to();
 
-			if m.promoted() == None {
+			if m.promoted().is_none() {
 				board.remove_piece(piece, to);
 				board.add_piece(piece, from);
 

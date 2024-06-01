@@ -99,5 +99,5 @@ pub fn magic(piece: MagicPiece) {
 		MagicPiece::Rook => Piece::Rook(Color::Both),
 	};
 
-	let table = Magic::generate(piece);
+	Magic::generate(piece);
 }

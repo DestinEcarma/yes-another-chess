@@ -70,7 +70,7 @@ impl ops::Shl<Rank> for u64 {
 	type Output = u64;
 
 	fn shl(self, rhs: Rank) -> Self::Output {
-		self << rhs as u8 * 8
+		self << (rhs as u8 * 8)
 	}
 }
 
