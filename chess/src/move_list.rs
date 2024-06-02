@@ -13,12 +13,6 @@ pub struct MoveList {
 impl Default for MoveList {
 	#[inline(always)]
 	fn default() -> Self {
-		Self::new()
-	}
-}
-
-impl MoveList {
-	pub fn new() -> Self {
 		Self {
 			list: unsafe {
 				let block = mem::MaybeUninit::uninit();
@@ -27,7 +21,9 @@ impl MoveList {
 			count: 0,
 		}
 	}
+}
 
+impl MoveList {
 	#[inline(always)]
 	pub fn push(&mut self, m: Move) {
 		self.list[self.count] = m;
