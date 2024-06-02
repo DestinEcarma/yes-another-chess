@@ -1,6 +1,5 @@
-use crate::board::{Bitboard, Board, Color, Piece, Square};
-
 use super::MoveGen;
+use crate::board::{piece::Pieces, Board, Color, Piece, Square};
 
 impl MoveGen {
 	#[inline(always)]
@@ -11,14 +10,14 @@ impl MoveGen {
 		let rook = self.rooks[self.rook_magics[square].index(occupancy)];
 		let bishop = self.bishops[self.bishop_magics[square].index(occupancy)];
 		let knight = self.knight[square];
-		let pawn = self.pawns[!opponent][square];
+		let pawn = self.pawns[opponent ^ 1][square];
 		let queen = rook | bishop;
 
-		(king & board.pieces[Piece::King(opponent)] > 0)
-			|| (queen & board.pieces[Piece::Queen(opponent)] > 0)
-			|| (rook & board.pieces[Piece::Rook(opponent)] > 0)
-			|| (bishop & board.pieces[Piece::Bishop(opponent)] > 0)
-			|| (knight & board.pieces[Piece::Knight(opponent)] > 0)
-			|| (pawn & board.pieces[Piece::Pawn(opponent)] > 0)
+		(king & board.pieces[opponent][Piece::KING] > 0)
+			|| (queen & board.pieces[opponent][Piece::QUEEN] > 0)
+			|| (rook & board.pieces[opponent][Piece::ROOK] > 0)
+			|| (bishop & board.pieces[opponent][Piece::BISHOP] > 0)
+			|| (knight & board.pieces[opponent][Piece::KNIGHT] > 0)
+			|| (pawn & board.pieces[opponent][Piece::PAWN] > 0)
 	}
 }

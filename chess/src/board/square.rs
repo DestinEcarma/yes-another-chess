@@ -1,237 +1,133 @@
-use super::{Bitboard, Error, File, Rank, RankFile};
-use std::{fmt, ops};
+use super::{
+	file_rank::{FileString, GetFile, GetRank, RankString},
+	File, Rank,
+};
 
-#[rustfmt::skip]
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub enum Square {
-	A1, B1, C1, D1, E1, F1, G1, H1, // Rank 8
-	A2, B2, C2, D2, E2, F2, G2, H2, // Rank 7
-	A3, B3, C3, D3, E3, F3, G3, H3, // Rank 6
-	A4, B4, C4, D4, E4, F4, G4, H4, // Rank 5
-	A5, B5, C5, D5, E5, F5, G5, H5, // Rank 4
-	A6, B6, C6, D6, E6, F6, G6, H6, // Rank 3
-	A7, B7, C7, D7, E7, F7, G7, H7, // Rank 2
-	A8, B8, C8, D8, E8, F8, G8, H8, // Rank 1
+pub type Square = usize;
+
+pub trait Squares {
+	const A1: Square = 0;
+	const B1: Square = 1;
+	const C1: Square = 2;
+	const D1: Square = 3;
+	const E1: Square = 4;
+	const F1: Square = 5;
+	const G1: Square = 6;
+	const H1: Square = 7;
+	const A2: Square = 8;
+	const B2: Square = 9;
+	const C2: Square = 10;
+	const D2: Square = 11;
+	const E2: Square = 12;
+	const F2: Square = 13;
+	const G2: Square = 14;
+	const H2: Square = 15;
+	const A3: Square = 16;
+	const B3: Square = 17;
+	const C3: Square = 18;
+	const D3: Square = 19;
+	const E3: Square = 20;
+	const F3: Square = 21;
+	const G3: Square = 22;
+	const H3: Square = 23;
+	const A4: Square = 24;
+	const B4: Square = 25;
+	const C4: Square = 26;
+	const D4: Square = 27;
+	const E4: Square = 28;
+	const F4: Square = 29;
+	const G4: Square = 30;
+	const H4: Square = 31;
+	const A5: Square = 32;
+	const B5: Square = 33;
+	const C5: Square = 34;
+	const D5: Square = 35;
+	const E5: Square = 36;
+	const F5: Square = 37;
+	const G5: Square = 38;
+	const H5: Square = 39;
+	const A6: Square = 40;
+	const B6: Square = 41;
+	const C6: Square = 42;
+	const D6: Square = 43;
+	const E6: Square = 44;
+	const F6: Square = 45;
+	const G6: Square = 46;
+	const H6: Square = 47;
+	const A7: Square = 48;
+	const B7: Square = 49;
+	const C7: Square = 50;
+	const D7: Square = 51;
+	const E7: Square = 52;
+	const F7: Square = 53;
+	const G7: Square = 54;
+	const H7: Square = 55;
+	const A8: Square = 56;
+	const B8: Square = 57;
+	const C8: Square = 58;
+	const D8: Square = 59;
+	const E8: Square = 60;
+	const F8: Square = 61;
+	const G8: Square = 62;
+	const H8: Square = 63;
 }
 
-impl PartialEq<Rank> for Square {
-	fn eq(&self, other: &Rank) -> bool {
-		(*self / 8) == *other as usize
+pub trait SquareConsts {
+	const SQUARE_SIZE: usize = 64;
+	const SQUARE_RANGE: std::ops::Range<Square> = 0..Self::SQUARE_SIZE;
+}
+
+impl Squares for Square {}
+impl SquareConsts for Square {}
+
+pub trait GetSquare<T> {
+	fn get_square(value: T) -> Self;
+}
+
+impl GetSquare<(File, Rank)> for Square {
+	#[inline(always)]
+	fn get_square((file, rank): (File, Rank)) -> Self {
+		(rank * 8 + file) as Self
 	}
 }
 
-impl PartialEq<File> for Square {
-	fn eq(&self, other: &File) -> bool {
-		(*self % 8) == *other as usize
-	}
-}
+impl GetSquare<&str> for Square {
+	fn get_square(value: &str) -> Self {
+		let chars = value.chars().collect::<Vec<char>>();
 
-impl ops::BitOr<Square> for Square {
-	type Output = Bitboard;
+		match (chars.first(), chars.get(1)) {
+			(Some(file), Some(rank)) => {
+				let file = File::get_file(*file);
+				let rank = Rank::get_rank(*rank);
 
-	fn bitor(self, rhs: Square) -> Self::Output {
-		Bitboard::from(self) | Bitboard::from(rhs)
-	}
-}
-
-impl ops::BitXor<usize> for Square {
-	type Output = Self;
-
-	fn bitxor(self, rhs: usize) -> Self::Output {
-		Self::from(self as usize ^ rhs)
-	}
-}
-
-impl ops::Shl<usize> for Square {
-	type Output = usize;
-
-	fn shl(self, rhs: usize) -> Self::Output {
-		(self as usize) << rhs
-	}
-}
-
-impl ops::Shl<Square> for u64 {
-	type Output = u64;
-
-	fn shl(self, rhs: Square) -> Self::Output {
-		self << rhs as usize
-	}
-}
-
-impl ops::Not for Square {
-	type Output = Bitboard;
-
-	fn not(self) -> Self::Output {
-		!Bitboard::from(self)
-	}
-}
-
-impl ops::Add<usize> for Square {
-	type Output = Square;
-
-	fn add(self, rhs: usize) -> Self::Output {
-		Square::from(self as usize + rhs)
-	}
-}
-
-impl ops::Sub<usize> for Square {
-	type Output = Square;
-
-	fn sub(self, rhs: usize) -> Self::Output {
-		Square::from(self as usize - rhs)
-	}
-}
-
-impl ops::Sub<Square> for Square {
-	type Output = i8;
-
-	fn sub(self, rhs: Square) -> Self::Output {
-		self as i8 - rhs as i8
-	}
-}
-
-impl ops::Div<usize> for Square {
-	type Output = usize;
-
-	fn div(self, rhs: usize) -> Self::Output {
-		self as usize / rhs
-	}
-}
-
-impl ops::Rem<usize> for Square {
-	type Output = usize;
-
-	fn rem(self, rhs: usize) -> Self::Output {
-		self as usize % rhs
-	}
-}
-
-#[rustfmt::skip]
-impl From<usize> for Square {
-	fn from(value: usize) -> Self {
-		match value {
-			// Rank 8
-			0 => Self::A1,  1 => Self::B1,  2 => Self::C1,  3 => Self::D1,
-			4 => Self::E1,  5 => Self::F1,  6 => Self::G1,  7 => Self::H1,
-			// Rank 7
-			8 => Self::A2,  9 => Self::B2, 10 => Self::C2, 11 => Self::D2,
-			12 => Self::E2, 13 => Self::F2, 14 => Self::G2, 15 => Self::H2,
-			// Rank 6
-			16 => Self::A3, 17 => Self::B3, 18 => Self::C3, 19 => Self::D3,
-			20 => Self::E3, 21 => Self::F3, 22 => Self::G3, 23 => Self::H3,
-			// Rank 5
-			24 => Self::A4, 25 => Self::B4, 26 => Self::C4, 27 => Self::D4,
-			28 => Self::E4, 29 => Self::F4, 30 => Self::G4, 31 => Self::H4,
-			// Rank 4
-			32 => Self::A5, 33 => Self::B5, 34 => Self::C5, 35 => Self::D5,
-			36 => Self::E5, 37 => Self::F5, 38 => Self::G5, 39 => Self::H5,
-			// Rank 3
-			40 => Self::A6, 41 => Self::B6, 42 => Self::C6, 43 => Self::D6,
-			44 => Self::E6, 45 => Self::F6, 46 => Self::G6, 47 => Self::H6,
-			// Rank 2
-			48 => Self::A7, 49 => Self::B7, 50 => Self::C7, 51 => Self::D7,
-			52 => Self::E7, 53 => Self::F7, 54 => Self::G7, 55 => Self::H7,
-			// Rank 1
-			56 => Self::A8, 57 => Self::B8, 58 => Self::C8, 59 => Self::D8,
-			60 => Self::E8, 61 => Self::F8, 62 => Self::G8, 63 => Self::H8,
-			_ => panic!("{}", Error::InvalidSquare(value)),
+				(rank * 8 + file) as Self
+			}
+			_ => panic!("Invalid square: {}", value),
 		}
 	}
 }
 
-#[rustfmt::skip]
-impl From<&str> for Square {
-	fn from(value: &str) -> Self {
-		let mut chars = value.chars();
+pub trait SquareLocation {
+	fn location(&self) -> (File, Rank);
+}
 
-		match (chars.next(), chars.next()) {
-			(Some(file), Some(rank)) => Self::from(RankFile::from((file, rank))),
-			_ => panic!("{}", Error::InvalidSquare(value)),
-		}
+impl SquareLocation for Square {
+	#[inline(always)]
+	fn location(&self) -> (File, Rank) {
+		((*self % 8) as File, (*self / 8) as Rank)
 	}
 }
 
-#[rustfmt::skip]
-impl From<RankFile> for Square {
-	fn from(value: RankFile) -> Self {
-		Self::from(usize::from(value))
-	}
+pub trait SquareString {
+	fn square_string(&self) -> String;
 }
 
-#[rustfmt::skip]
-impl fmt::Display for Square {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		write!(f, "{}", match self {
-			// Rank 8
-			Self::A1 => "a1", Self::B1 => "b1", Self::C1 => "c1", Self::D1 => "d1",
-			Self::E1 => "e1", Self::F1 => "f1", Self::G1 => "g1", Self::H1 => "h1",
-			// Rank 7
-			Self::A2 => "a2", Self::B2 => "b2", Self::C2 => "c2", Self::D2 => "d2",
-			Self::E2 => "e2", Self::F2 => "f2", Self::G2 => "g2", Self::H2 => "h2",
-			// Rank 6
-			Self::A3 => "a3", Self::B3 => "b3", Self::C3 => "c3", Self::D3 => "d3",
-			Self::E3 => "e3", Self::F3 => "f3", Self::G3 => "g3", Self::H3 => "h3",
-			// Rank 5
-			Self::A4 => "a4", Self::B4 => "b4", Self::C4 => "c4", Self::D4 => "d4",
-			Self::E4 => "e4", Self::F4 => "f4", Self::G4 => "g4", Self::H4 => "h4",
-			// Rank 4
-			Self::A5 => "a5", Self::B5 => "b5", Self::C5 => "c5", Self::D5 => "d5",
-			Self::E5 => "e5", Self::F5 => "f5", Self::G5 => "g5", Self::H5 => "h5",
-			// Rank 3
-			Self::A6 => "a6", Self::B6 => "b6", Self::C6 => "c6", Self::D6 => "d6",
-			Self::E6 => "e6", Self::F6 => "f6", Self::G6 => "g6", Self::H6 => "h6",
-			// Rank 2
-			Self::A7 => "a7", Self::B7 => "b7", Self::C7 => "c7", Self::D7 => "d7",
-			Self::E7 => "e7", Self::F7 => "f7", Self::G7 => "g7", Self::H7 => "h7",
-			// Rank 1
-			Self::A8 => "a8", Self::B8 => "b8", Self::C8 => "c8", Self::D8 => "d8",
-			Self::E8 => "e8", Self::F8 => "f8", Self::G8 => "g8", Self::H8 => "h8",
-		})
-	}
-}
+impl SquareString for Square {
+	#[inline(always)]
+	fn square_string(&self) -> String {
+		let file = (*self % 8) as File;
+		let rank = (*self / 8) as Rank;
 
-impl Square {
-	pub const SIZE: usize = 64;
-
-	pub fn iter() -> SquareIter {
-		SquareIter {
-			inner: Some(Self::A1),
-		}
-	}
-}
-
-pub struct SquareIter {
-	inner: Option<Square>,
-}
-
-impl Iterator for SquareIter {
-	type Item = Square;
-
-	fn next(&mut self) -> Option<Self::Item> {
-		let current = self.inner?;
-
-		self.inner = match current {
-			Square::H8 => None,
-			_ => Some(current + 1),
-		};
-
-		Some(current)
-	}
-}
-
-#[cfg(test)]
-mod test {
-	use super::*;
-
-	#[test]
-	fn from_usize() {
-		assert_eq!(Square::from(0), Square::A1);
-		assert_eq!(Square::from(63), Square::H8);
-	}
-
-	#[test]
-	fn from_str() {
-		assert_eq!(Square::from("A1"), Square::A1);
-		assert_eq!(Square::from("H8"), Square::H8);
+		format!("{}{}", file.file_string(), rank.rank_string())
 	}
 }

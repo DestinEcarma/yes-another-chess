@@ -1,58 +1,44 @@
-use super::{Bitboard, Color, Piece, Rank};
-use std::ops;
+use super::{
+	bitboard::BitboardString, color::ColorConsts, file_rank::FileRankConsts, piece::PieceConsts,
+	square::SquareConsts, Bitboard, Color, Piece,
+};
 
-#[derive(Debug)]
-pub struct Pieces(pub [Bitboard; Piece::SIZE * Color::SIZE]);
+pub type PieceList = [Piece; usize::SQUARE_SIZE];
+pub type BitboardPieces = [[Bitboard; usize::PIECE_SIZE]; usize::COLOR_SIZE];
 
-impl ops::Index<Piece> for Pieces {
-	type Output = Bitboard;
-
-	fn index(&self, index: Piece) -> &Self::Output {
-		&self.0[index.index()]
-	}
+pub trait PrintBitboards {
+	fn print_bitboards(&self, color: Color);
 }
 
-impl ops::IndexMut<Piece> for Pieces {
-	fn index_mut(&mut self, index: Piece) -> &mut Self::Output {
-		&mut self.0[index.index()]
-	}
-}
+impl PrintBitboards for BitboardPieces {
+	fn print_bitboards(&self, color: Color) {
+		if let Some(bitboards) = self.get(color) {
+			let bitboards = bitboards.iter().map(|bitboard| bitboard.bitboard_string());
 
-impl Pieces {
-	pub fn iter(&self, color: Color) -> impl Iterator<Item = &Bitboard> {
-		self.0
-			.iter()
-			.enumerate()
-			.filter(move |(i, _)| color == *i)
-			.map(|(_, bb)| bb)
-	}
+			let lines = bitboards
+				.map(|s| s.lines().map(|s| s.to_string()).collect::<Vec<String>>())
+				.collect::<Vec<Vec<String>>>();
 
-	pub fn print_bitboards(&self, color: Color) {
-		let bitboards = self.iter(color).map(|bitboard| format!("{bitboard}"));
+			let mut output = format!(
+				"\n{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}",
+				"King", "Queen", "Rook", "Bishop", "Knight", "Pawn"
+			);
 
-		let lines = bitboards
-			.map(|s| s.lines().map(|s| s.to_string()).collect::<Vec<String>>())
-			.collect::<Vec<Vec<String>>>();
+			for rank in usize::FILE_RANK_RANGE.rev() {
+				let mut combined_line = String::new();
 
-		let mut output = format!(
-			"\n{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}",
-			"King", "Queen", "Rook", "Bishop", "Knight", "Pawn"
-		);
+				for (piece, line) in lines.iter().enumerate() {
+					if piece != 0 {
+						combined_line += " ";
+					}
 
-		for rank in Rank::First.iter() {
-			let mut combined_line = String::new();
-
-			for (piece, line) in lines.iter().enumerate() {
-				if piece != 0 {
-					combined_line += " ";
+					combined_line += &line[rank];
 				}
 
-				combined_line += &line[rank];
+				output += &format!("\n{combined_line}");
 			}
 
-			output += &format!("\n{combined_line}");
+			println!("{output}\n")
 		}
-
-		println!("{output}\n")
 	}
 }

@@ -1,11 +1,10 @@
-use std::time::Instant;
-
 use chess::{
-	board::{Board, Color},
+	board::{color::Colors, piece::Pieces, pieces::PrintBitboards, Board, Color},
 	move_gen::MoveGen,
 	Chess,
 };
 use clap::{command, Parser, Subcommand, ValueEnum};
+use std::time::Instant;
 
 #[derive(Debug, Parser)]
 #[command(version)]
@@ -58,9 +57,9 @@ pub fn display(fen: Option<String>, bitboards: bool) {
 		false => println!("{board}"),
 		true => {
 			println!("White Pieces:");
-			board.pieces.print_bitboards(Color::White);
+			board.pieces.print_bitboards(Color::WHITE);
 			println!("Black Pieces:");
-			board.pieces.print_bitboards(Color::Black);
+			board.pieces.print_bitboards(Color::BLACK);
 		}
 	}
 }
@@ -86,8 +85,6 @@ pub fn perft(depth: u8, fen: Option<String>) {
 	println!("\nTotal Time (ms)\t: {elapsed}");
 	println!("Nodes searched\t: {nodes}");
 	println!("Nodes/second\t: {nodes_per_seconds}");
-
-	println!("{chess}");
 }
 
 #[cfg(debug_assertions)]
@@ -95,8 +92,8 @@ pub fn magic(piece: MagicPiece) {
 	use chess::{board::Piece, move_gen::Magic};
 
 	let piece = match piece {
-		MagicPiece::Bishop => Piece::Bishop(Color::Both),
-		MagicPiece::Rook => Piece::Rook(Color::Both),
+		MagicPiece::Rook => Piece::ROOK,
+		MagicPiece::Bishop => Piece::BISHOP,
 	};
 
 	Magic::generate(piece);

@@ -1,11 +1,7 @@
-pub use super::bitboard::*;
-pub use super::castle_rights::*;
-pub use super::color::*;
-pub use super::error::*;
-pub use super::history::*;
-pub use super::piece::*;
-pub use super::piece_list::*;
-pub use super::pieces::*;
-pub use super::rank_file::*;
-pub use super::square::*;
-pub use super::Board;
+pub use super::bitboard::Bitboard;
+pub use super::castle_right::CastleRight;
+pub use super::color::Color;
+pub use super::file_rank::{File, Rank};
+pub use super::piece::Piece;
+pub use super::pieces::{BitboardPieces, PieceList};
+pub use super::square::Square;

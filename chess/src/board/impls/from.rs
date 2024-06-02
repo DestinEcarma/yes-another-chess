@@ -1,19 +1,26 @@
+use castle_right::GetCastleRight;
+use square::GetSquare;
+
 use super::*;
+use super::{
+	color::{ColorConsts, Colors, GetColor},
+	file_rank::{Files, Ranks},
+	piece::{GetPiece, PieceConsts},
+	square::SquareConsts,
+};
 
 impl From<&str> for Board {
 	fn from(value: &str) -> Self {
 		let mut board = Self {
-			pieces: Pieces([Bitboard::default(); 12]),
-			color: Color::White,
+			pieces: [[Bitboard::default(); usize::PIECE_SIZE]; usize::COLOR_SIZE],
+			color: Color::WHITE,
 			en_passant: None,
-			castle_rights: CastleRights::default(),
+			castle_rights: CastleRight::default(),
 
-			piece_list: PieceList::default(),
+			piece_list: [Piece::NONE; usize::SQUARE_SIZE],
 			occupancy: Bitboard::default(),
-			ally: Bitboard::default(),
-			enemy: Bitboard::default(),
+			occupancy_color: [Bitboard::default(); usize::COLOR_SIZE],
 
-			history: History::default(),
 			halfmove_clock: 0,
 			fullmove_number: 1,
 		};
@@ -24,7 +31,14 @@ impl From<&str> for Board {
 		board.set_color(tokens[1]);
 		board.set_castling_rights(tokens[2]);
 		board.set_en_passant(tokens[3]);
-		board.update_occupancies();
+
+		if let Some(num) = tokens.get(4) {
+			board.halfmove_clock = num.parse().unwrap_or(0);
+		}
+
+		if let Some(num) = tokens.get(5) {
+			board.fullmove_number = num.parse().unwrap_or(1);
+		}
 
 		board
 	}
@@ -32,23 +46,27 @@ impl From<&str> for Board {
 
 impl Board {
 	fn set_pieces(&mut self, pieces: &str) {
-		let mut rank = Rank::Eighth;
+		let mut rank = Rank::R8;
 		let mut file = File::A;
 
 		for ch in pieces.chars() {
 			match ch {
 				'/' => {
-					rank.next_back();
+					rank -= 1;
 					file = File::A;
 				}
 				'1'..='8' => {
 					for _ in 0..ch.to_digit(10).unwrap() {
-						file.next();
+						file += 1;
 					}
 				}
 				_ => {
-					self.add_piece(Piece::from(ch), Square::from(RankFile(rank, file)));
-					file.next();
+					self.add_piece(
+						Piece::get_piece(ch),
+						Color::get_color(ch.is_uppercase()),
+						Square::get_square((file, rank)),
+					);
+					file += 1;
 				}
 			}
 		}
@@ -56,7 +74,7 @@ impl Board {
 
 	fn set_color(&mut self, color: &str) {
 		if let Some(ch) = color.chars().next() {
-			self.color = Color::from(ch);
+			self.color = Color::get_color(ch);
 		}
 	}
 
@@ -66,13 +84,13 @@ impl Board {
 		}
 
 		for ch in castling_rights.chars() {
-			self.castle_rights |= CastleRight::from(ch);
+			self.castle_rights |= CastleRight::get_castle_right(ch);
 		}
 	}
 
 	fn set_en_passant(&mut self, en_passant: &str) {
 		if en_passant != "-" {
-			self.en_passant = Some(Square::from(en_passant));
+			self.en_passant = Some(Square::get_square(en_passant));
 		}
 	}
 }

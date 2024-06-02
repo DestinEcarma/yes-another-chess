@@ -1,12 +1,22 @@
 mod defs;
 mod direction;
-mod error;
 mod impls;
 mod magic;
 mod piece_move;
 mod prelude;
 
-use crate::board::{Bitboard, Board, CastleRight, Color, Piece, Rank, Square};
+use crate::{
+	board::{
+		bitboard::{BitboardLSB, BitboardOccupied, BitboardRanks, BitboardSquares},
+		castle_right::CastleRights,
+		color::{ColorConsts, ColorString, Colors},
+		file_rank::Ranks,
+		piece::{PiecePromotions, Pieces},
+		square::{SquareConsts, Squares},
+		Bitboard, Board, CastleRight, Color, Piece, Rank, Square,
+	},
+	move_list::MoveList,
+};
 pub use prelude::*;
 
 #[derive(Debug)]
@@ -17,157 +27,220 @@ pub struct MoveGen {
 	rook_magics: PieceMagics,
 	bishop_magics: PieceMagics,
 	knight: PieceMoves,
-	pawns: [PieceMoves; Color::SIZE],
+	pawns: [PieceMoves; usize::COLOR_SIZE],
 }
 
 impl MoveGen {
 	#[inline(always)]
-	pub(crate) fn king(&self, board: &Board, list: &mut MoveList) {
+	pub fn king(&self, board: &Board, list: &mut MoveList) {
 		let color = board.color;
-		let mut piece = board.pieces[Piece::King(color)];
-		let square = piece.lsb();
-		let moves = self.king[square] & !board.ally;
+		let mut piece = board.pieces[color][Piece::KING];
 
-		self.add_move(board, Piece::King(color), square, moves, list);
+		let square = piece.pop_lsb();
+		let moves = self.king[square] & !board.ally();
+
+		self.add_move(board, Piece::KING, square, moves, list);
 	}
 
 	#[inline(always)]
-	pub(crate) fn queens(&self, board: &Board, list: &mut MoveList) {
+	pub fn queens(&self, board: &Board, list: &mut MoveList) {
 		let color = board.color;
-		let mut pieces = board.pieces[Piece::Queen(color)];
 		let occupancy = board.occupancy;
-		let ally = board.ally;
+		let ally = board.ally();
+
+		let mut pieces = board.pieces[color][Piece::QUEEN];
 
 		while pieces > 0 {
-			let square = pieces.lsb();
-			let rook_index = self.rook_magics[square].index(board.occupancy);
-			let bishop_index = self.bishop_magics[square].index(board.occupancy);
-			let moves = (self.rooks[rook_index] | self.bishops[bishop_index]) & !board.ally;
+			let square = pieces.pop_lsb();
 
-			self.add_move(board, Piece::Queen(color), square, moves, list);
+			let rook_index = self.rook_magics[square].index(occupancy);
+			let bishop_index = self.bishop_magics[square].index(occupancy);
+			let moves = (self.rooks[rook_index] | self.bishops[bishop_index]) & !ally;
+
+			self.add_move(board, Piece::QUEEN, square, moves, list);
 		}
 	}
 
 	#[inline(always)]
-	pub(crate) fn rooks(&self, board: &Board, list: &mut MoveList) {
+	pub fn rooks(&self, board: &Board, list: &mut MoveList) {
 		let color = board.color;
-		let mut pieces = board.pieces[Piece::Rook(color)];
+		let occupancy = board.occupancy;
+		let ally = board.ally();
+
+		let mut pieces = board.pieces[color][Piece::ROOK];
 
 		while pieces > 0 {
-			let square = pieces.lsb();
-			let index = self.rook_magics[square].index(board.occupancy);
-			let moves = self.rooks[index] & !board.ally;
+			let square = pieces.pop_lsb();
 
-			self.add_move(board, Piece::Rook(color), square, moves, list);
+			let index = self.rook_magics[square].index(occupancy);
+			let moves = self.rooks[index] & !ally;
+
+			self.add_move(board, Piece::ROOK, square, moves, list);
 		}
 	}
 
 	#[inline(always)]
-	pub(crate) fn bishops(&self, board: &Board, list: &mut MoveList) {
+	pub fn bishops(&self, board: &Board, list: &mut MoveList) {
 		let color = board.color;
-		let mut pieces = board.pieces[Piece::Bishop(color)];
+		let occupancy = board.occupancy;
+		let ally = board.ally();
+
+		let mut pieces = board.pieces[color][Piece::BISHOP];
 
 		while pieces > 0 {
-			let square = pieces.lsb();
-			let index = self.bishop_magics[square].index(board.occupancy);
-			let moves = self.bishops[index] & !board.ally;
+			let square = pieces.pop_lsb();
 
-			self.add_move(board, Piece::Bishop(color), square, moves, list);
+			let index = self.bishop_magics[square].index(occupancy);
+			let moves = self.bishops[index] & !ally;
+
+			self.add_move(board, Piece::BISHOP, square, moves, list);
 		}
 	}
 
 	#[inline(always)]
-	pub(crate) fn knights(&self, board: &Board, list: &mut MoveList) {
+	pub fn knights(&self, board: &Board, list: &mut MoveList) {
 		let color = board.color;
-		let mut pieces = board.pieces[Piece::Knight(color)];
+		let ally = board.ally();
+
+		let mut pieces = board.pieces[color][Piece::KNIGHT];
 
 		while pieces > 0 {
-			let square = pieces.lsb();
-			let moves = self.knight[square] & !board.ally;
+			let square = pieces.pop_lsb();
+			let moves = self.knight[square] & !ally;
 
-			self.add_move(board, Piece::Knight(color), square, moves, list);
+			self.add_move(board, Piece::KNIGHT, square, moves, list);
 		}
 	}
 
 	#[inline(always)]
-	pub(crate) fn pawns(&self, board: &Board, list: &mut MoveList) {
+	pub fn pawns(&self, board: &Board, list: &mut MoveList) {
 		let color = board.color;
-		let enemy = board.enemy;
+		let enemy = board.enemy();
 		let empty = !board.occupancy;
 
 		let fourth = match color {
-			Color::White => Rank::Fourth,
-			Color::Black => Rank::Fifth,
-			_ => panic!("{}", Error::InvalidColor(color)),
+			Color::WHITE => Rank::R4,
+			Color::BLACK => Rank::R5,
+			_ => panic!("Invalid color: {}", color.color_string()),
 		};
 
 		let direction = match color {
-			Color::White => Direction::North,
-			Color::Black => Direction::South,
-			_ => panic!("{}", Error::InvalidColor(color)),
+			Color::WHITE => Direction::North,
+			Color::BLACK => Direction::South,
+			_ => panic!("Invalid color: {}", color.color_string()),
 		};
 
-		let rotation_count = (Square::SIZE + direction) as u32;
+		let rotation_count = (usize::SQUARE_SIZE + direction) as u32;
 
-		let mut pieces = board.pieces[Piece::Pawn(color)];
+		let mut pieces = board.pieces[color][Piece::PAWN];
 
 		while pieces > 0 {
-			let square = pieces.lsb();
+			let square = pieces.pop_lsb();
 			let to = square + direction;
 
-			let one_step = empty & to;
-			let two_step = one_step.rotate_left(rotation_count) & empty & fourth;
+			let one_step = empty & Bitboard::SQUARES[to];
+			let two_step = one_step.rotate_left(rotation_count) & empty & Bitboard::RANKS[fourth];
 			let attacks = self.pawns[color][square];
 			let captures = attacks & enemy;
 
 			let en_passant = match board.en_passant {
-				Some(square) => attacks & square,
+				Some(square) => attacks & Bitboard::SQUARES[square],
 				None => Bitboard::default(),
 			};
 
 			let moves = one_step | two_step | captures | en_passant;
 
-			self.add_move(board, Piece::Pawn(color), square, moves, list);
+			self.add_move(board, Piece::PAWN, square, moves, list);
 		}
 	}
 
 	#[inline(always)]
-	pub(crate) fn castling(&self, board: &Board, list: &mut MoveList) {
+	pub fn castling(&self, board: &Board, list: &mut MoveList) {
 		let color = board.color;
-		let opponent = !color;
+		let opponent = color ^ 1;
 		let occupancy = board.occupancy;
-		let mut rights = board.castle_rights & color;
 
-		let square = match color {
-			Color::White => Square::E1,
-			Color::Black => Square::E8,
-			_ => panic!("{}", Error::InvalidColor(color)),
-		};
+		let rights = board.castle_rights;
 
-		while rights > 0 {
-			let castle_right_index = rights.trailing_zeros() as u8;
+		if color == Color::WHITE && rights & CastleRight::WHITE > 0 {
+			if rights & CastleRight::WHITE_KING > 0 {
+				let blockers = Bitboard::SQUARES[Square::F1] | Bitboard::SQUARES[Square::G1];
 
-			let castle_right = CastleRight::from(castle_right_index);
-			let blocker = castle_right.blocker();
-			let neighbor = castle_right.neighbor();
-
-			if (occupancy & blocker) == 0
-				&& !self.square_attacked(board, opponent, square)
-				&& !self.square_attacked(board, opponent, neighbor)
-			{
-				let to = castle_right.square();
-
-				self.add_move(board, Piece::King(color), square, Bitboard::from(to), list)
+				if occupancy & blockers == 0
+					&& !self.square_attacked(board, opponent, Square::E1)
+					&& !self.square_attacked(board, opponent, Square::F1)
+				{
+					self.add_move(
+						board,
+						Piece::KING,
+						Square::E1,
+						Bitboard::SQUARES[Square::G1],
+						list,
+					);
+				}
 			}
 
-			rights ^= 1 << castle_right_index;
+			if rights & CastleRight::WHITE_QUEEN > 0 {
+				let blockers = Bitboard::SQUARES[Square::D1]
+					| Bitboard::SQUARES[Square::C1]
+					| Bitboard::SQUARES[Square::B1];
+
+				if occupancy & blockers == 0
+					&& !self.square_attacked(board, opponent, Square::E1)
+					&& !self.square_attacked(board, opponent, Square::D1)
+				{
+					self.add_move(
+						board,
+						Piece::KING,
+						Square::E1,
+						Bitboard::SQUARES[Square::C1],
+						list,
+					);
+				}
+			}
+		} else if color == Color::BLACK && rights & CastleRight::BLACK > 0 {
+			if rights & CastleRight::BLACK_KING > 0 {
+				let blockers = Bitboard::SQUARES[Square::F8] | Bitboard::SQUARES[Square::G8];
+
+				if occupancy & blockers == 0
+					&& !self.square_attacked(board, opponent, Square::E8)
+					&& !self.square_attacked(board, opponent, Square::F8)
+				{
+					self.add_move(
+						board,
+						Piece::KING,
+						Square::E8,
+						Bitboard::SQUARES[Square::G8],
+						list,
+					);
+				}
+			}
+
+			if rights & CastleRight::BLACK_QUEEN > 0 {
+				let blockers = Bitboard::SQUARES[Square::D8]
+					| Bitboard::SQUARES[Square::C8]
+					| Bitboard::SQUARES[Square::B8];
+
+				if occupancy & blockers == 0
+					&& !self.square_attacked(board, opponent, Square::E8)
+					&& !self.square_attacked(board, opponent, Square::D8)
+				{
+					self.add_move(
+						board,
+						Piece::KING,
+						Square::E8,
+						Bitboard::SQUARES[Square::C8],
+						list,
+					);
+				}
+			}
 		}
 	}
 }
 
 impl MoveGen {
 	#[inline(always)]
-	pub(crate) fn add_move(
+	pub fn add_move(
 		&self,
 		board: &Board,
 		piece: Piece,
@@ -177,31 +250,28 @@ impl MoveGen {
 	) {
 		let mut moves = moves;
 		let color = board.color;
-		let is_pawn = Piece::Pawn(color) == piece;
+		let is_pawn = Piece::PAWN == piece;
 
 		let promotion_rank = match color {
-			Color::White => Rank::Eighth,
-			Color::Black => Rank::First,
-			_ => panic!("{}", Error::InvalidColor(color)),
+			Color::WHITE => Rank::R8,
+			Color::BLACK => Rank::R1,
+			_ => panic!("Invalid color: {}", color.color_string()),
 		};
 
 		while moves > 0 {
-			let to = moves.lsb();
+			let to = moves.pop_lsb();
 
-			let capture = match board.piece_list[to] {
-				Some(piece) => piece.index(),
-				None => 0,
-			};
+			let capture = board.piece_list[to];
 			let en_passant = match board.en_passant {
 				Some(square) => is_pawn && square == to,
 				None => false,
 			};
 
-			let promotion = is_pawn && Bitboard::from(promotion_rank).occupied(to);
-			let two_step = is_pawn && (to - from).abs() == 16;
-			let castling = piece == Piece::King(color) && (from - to).abs() == 2;
+			let promotion = is_pawn && Bitboard::RANKS[promotion_rank].occupied(to);
+			let two_step = is_pawn && (to as i8 - from as i8).abs() == 16;
+			let castling = piece == Piece::KING && (from as i8 - to as i8).abs() == 2;
 
-			let move_data = piece.index()
+			let move_data = piece
 				| from << Move::FROM_SQUARE
 				| to << Move::TO_SQUARE
 				| capture << Move::CAPTURE
@@ -210,10 +280,10 @@ impl MoveGen {
 				| (castling as usize) << Move::CASTLING;
 
 			if !promotion {
-				list.push(Move::new(move_data));
+				list.push(Move::new(move_data | Piece::NONE << Move::PROMOTION));
 			} else {
-				for piece in Piece::promotions(color) {
-					list.push(Move::new(move_data | piece.index() << Move::PROMOTION));
+				for piece in Piece::PROMOTIONS {
+					list.push(Move::new(move_data | piece << Move::PROMOTION));
 				}
 			}
 		}

@@ -9,9 +9,11 @@ impl Chess {
 
 		let mut nodes = 0;
 
-		let moves = self.generate_moves();
+		let list = self.generate_moves();
 
-		for m in moves {
+		for i in 0..list.len() {
+			let m = list.get_move(i);
+
 			if self.play_move(m) {
 				let move_nodes = self.perft_driver(depth - 1);
 				self.undo_move();
@@ -32,9 +34,11 @@ impl Chess {
 
 		let mut nodes = 0;
 
-		let moves = self.generate_moves();
+		let list = self.generate_moves();
 
-		for m in moves {
+		for i in 0..list.len() {
+			let m = list.get_move(i);
+
 			if self.play_move(m) {
 				nodes += self.perft_driver(depth - 1);
 				self.undo_move();

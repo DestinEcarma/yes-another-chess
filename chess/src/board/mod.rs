@@ -1,34 +1,34 @@
-mod bitboard;
-mod castle_rights;
-mod color;
-mod error;
-mod history;
 mod impls;
-mod piece;
-mod piece_list;
-mod pieces;
 mod prelude;
-mod rank_file;
-mod square;
+
+pub mod bitboard;
+pub mod castle_right;
+pub mod color;
+pub mod file_rank;
+pub mod piece;
+pub mod pieces;
+pub mod square;
+
+use bitboard::BitboardSquares;
+use color::ColorConsts;
+use piece::Pieces;
 
 pub use prelude::*;
 
 #[derive(Debug)]
 pub struct Board {
-	pub pieces: Pieces,
+	pub pieces: BitboardPieces,
 	pub color: Color,
 	pub en_passant: Option<Square>,
-	pub castle_rights: CastleRights,
+	pub castle_rights: CastleRight,
 
 	pub piece_list: PieceList,
+
 	pub occupancy: Bitboard,
-	pub ally: Bitboard,
-	pub enemy: Bitboard,
+	pub occupancy_color: [Bitboard; usize::COLOR_SIZE],
 
 	pub halfmove_clock: u8,
 	pub fullmove_number: u16,
-
-	pub history: History,
 }
 
 impl Default for Board {
@@ -39,33 +39,32 @@ impl Default for Board {
 
 impl Board {
 	#[inline(always)]
-	pub fn add_piece(&mut self, piece: Piece, square: Square) {
-		self.piece_list[square] = Some(piece);
-		self.pieces[piece] |= square;
+	pub fn add_piece(&mut self, piece: Piece, color: Color, square: Square) {
+		self.piece_list[square] = piece;
+		self.pieces[color][piece] |= Bitboard::SQUARES[square];
+
+		self.occupancy |= Bitboard::SQUARES[square];
+		self.occupancy_color[color] |= Bitboard::SQUARES[square];
 	}
 
 	#[inline(always)]
-	pub fn remove_piece(&mut self, piece: Piece, square: Square) {
-		self.piece_list[square] = None;
-		self.pieces[piece] &= !square;
+	pub fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
+		self.piece_list[square] = Piece::NONE;
+		self.pieces[color][piece] &= !(Bitboard::SQUARES[square]);
+
+		self.occupancy &= !(Bitboard::SQUARES[square]);
+		self.occupancy_color[color] &= !(Bitboard::SQUARES[square]);
 	}
 }
 
 impl Board {
 	#[inline(always)]
-	pub fn update_occupancies(&mut self) {
-		self.occupancy = Bitboard::default();
-		self.ally = Bitboard::default();
-		self.enemy = Bitboard::default();
+	pub fn ally(&self) -> Bitboard {
+		self.occupancy_color[self.color]
+	}
 
-		for piece in Piece::King(self.color).iter() {
-			self.occupancy |= self.pieces[piece];
-			self.ally |= self.pieces[piece];
-		}
-
-		for piece in Piece::King(!self.color).iter() {
-			self.occupancy |= self.pieces[piece];
-			self.enemy |= self.pieces[piece];
-		}
+	#[inline(always)]
+	pub fn enemy(&self) -> Bitboard {
+		self.occupancy_color[self.color ^ 1]
 	}
 }

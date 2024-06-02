@@ -1,12 +1,19 @@
 use super::{AttackTable, BlockerTable, Direction, MoveGen};
-use crate::board::{Bitboard, File, Rank, RankFile, Square};
+use crate::board::{
+	bitboard::{BitboardFiles, BitboardOccupied, BitboardRanks, BitboardSquares},
+	file_rank::{Files, Ranks},
+	square::SquareLocation,
+	Bitboard, File, Rank, Square,
+};
 
 impl MoveGen {
 	pub fn rook_mask(square: Square) -> Bitboard {
 		let edges = Self::edges(square);
-		let mask = Rank::from(square) | File::from(square);
+		let (file, rank) = square.location();
 
-		mask & !edges & !square
+		let mask = Bitboard::RANKS[rank] | Bitboard::FILES[file];
+
+		mask & !edges & !Bitboard::SQUARES[square]
 	}
 
 	pub fn bishop_mask(square: Square) -> Bitboard {
@@ -16,7 +23,7 @@ impl MoveGen {
 			| Self::ray(Bitboard::default(), square, Direction::SouthEast)
 			| Self::ray(Bitboard::default(), square, Direction::SouthWest);
 
-		mask & !edges & !square
+		mask & !edges & !Bitboard::SQUARES[square]
 	}
 
 	pub fn rook_attacks(square: Square, blockers: &BlockerTable) -> AttackTable {
@@ -68,10 +75,15 @@ impl MoveGen {
 	}
 
 	fn edges(square: Square) -> Bitboard {
-		let rank = Rank::from(square);
-		let file = File::from(square);
+		let (file, rank) = square.location();
 
-		(!file & File::A) | (!file & File::H) | (!rank & Rank::First) | (!rank & Rank::Eighth)
+		let bitboard_file = Bitboard::FILES[file];
+		let bitboard_rank = Bitboard::RANKS[rank];
+
+		(!bitboard_file & Bitboard::FILES[File::A])
+			| (!bitboard_file & Bitboard::FILES[File::H])
+			| (!bitboard_rank & Bitboard::RANKS[Rank::R1])
+			| (!bitboard_rank & Bitboard::RANKS[Rank::R8])
 	}
 
 	fn ray(bitboard: Bitboard, mut square: Square, direction: Direction) -> Bitboard {
@@ -79,7 +91,7 @@ impl MoveGen {
 
 		while !(direction == square) {
 			square += direction;
-			ray |= square;
+			ray |= Bitboard::SQUARES[square];
 
 			if bitboard.occupied(square) {
 				break;

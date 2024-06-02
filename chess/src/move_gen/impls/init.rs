@@ -1,21 +1,28 @@
-use super::{Error, Magic, MoveGen, BISHOP_TABLE_SIZE, ROOK_TABLE_SIZE};
-use crate::board::{Bitboard, Color, File, Piece, Rank, Square};
+use super::{Magic, MoveGen, BISHOP_TABLE_SIZE, ROOK_TABLE_SIZE};
+use crate::board::{
+	bitboard::{BitboardFiles, BitboardRanks, BitboardSquares},
+	color::{ColorConsts, Colors},
+	file_rank::{Files, Ranks},
+	piece::{PieceString, Pieces},
+	square::SquareConsts,
+	Bitboard, Color, File, Piece, Rank,
+};
 
 impl Default for MoveGen {
 	fn default() -> Self {
 		let mut move_gen = Self {
-			king: [Bitboard::default(); Square::SIZE],
+			king: [Bitboard::default(); usize::SQUARE_SIZE],
 			rooks: vec![Bitboard::default(); ROOK_TABLE_SIZE],
 			bishops: vec![Bitboard::default(); BISHOP_TABLE_SIZE],
-			rook_magics: [Magic::default(); Square::SIZE],
-			bishop_magics: [Magic::default(); Square::SIZE],
-			knight: [Bitboard::default(); Square::SIZE],
-			pawns: [[Bitboard::default(); Square::SIZE]; Color::SIZE],
+			rook_magics: [Magic::default(); usize::SQUARE_SIZE],
+			bishop_magics: [Magic::default(); usize::SQUARE_SIZE],
+			knight: [Bitboard::default(); usize::SQUARE_SIZE],
+			pawns: [[Bitboard::default(); usize::SQUARE_SIZE]; usize::COLOR_SIZE],
 		};
 
 		move_gen.init_king();
-		move_gen.init_magic(Piece::Rook(Color::Both));
-		move_gen.init_magic(Piece::Bishop(Color::Both));
+		move_gen.init_magic(Piece::ROOK);
+		move_gen.init_magic(Piece::BISHOP);
 		move_gen.init_knight();
 		move_gen.init_pawn();
 
@@ -25,44 +32,72 @@ impl Default for MoveGen {
 
 impl MoveGen {
 	fn init_king(&mut self) {
-		for square in Square::iter() {
-			let bitboard = Bitboard::from(square);
+		for square in usize::SQUARE_RANGE {
+			let bitboard = Bitboard::SQUARES[square];
 
-			self.king[square] |= (bitboard & !File::A & !Rank::Eighth) << 7
-				| (bitboard & !Rank::Eighth) << 8
-				| (bitboard & !Rank::Eighth & !File::H) << 9
-				| (bitboard & !File::H) << 1
-				| (bitboard & !Rank::First & !File::H) >> 7
-				| (bitboard & !Rank::First) >> 8
-				| (bitboard & !Rank::First & !File::A) >> 9
-				| (bitboard & !File::A) >> 1;
+			self.king[square] |=
+				(bitboard & !Bitboard::FILES[File::A] & !Bitboard::RANKS[Rank::R8]) << 7
+					| (bitboard & !Bitboard::RANKS[Rank::R8]) << 8
+					| (bitboard & !Bitboard::RANKS[Rank::R8] & !Bitboard::FILES[File::H]) << 9
+					| (bitboard & !Bitboard::FILES[File::H]) << 1
+					| (bitboard & !Bitboard::RANKS[Rank::R1] & !Bitboard::FILES[File::H]) >> 7
+					| (bitboard & !Bitboard::RANKS[Rank::R1]) >> 8
+					| (bitboard & !Bitboard::RANKS[Rank::R1] & !Bitboard::FILES[File::A]) >> 9
+					| (bitboard & !Bitboard::FILES[File::A]) >> 1;
 		}
 	}
 
 	fn init_knight(&mut self) {
-		for square in Square::iter() {
-			let bitboard = Bitboard::from(square);
+		for square in usize::SQUARE_RANGE {
+			let bitboard = Bitboard::SQUARES[square];
 
-			self.knight[square] |= (bitboard & !Rank::Eighth & !Rank::Seventh & !File::A) << 15
-				| (bitboard & !Rank::Eighth & !Rank::Seventh & !File::H) << 17
-				| (bitboard & !Rank::Eighth & !File::A & !File::B) << 6
-				| (bitboard & !Rank::Eighth & !File::G & !File::H) << 10
-				| (bitboard & !Rank::First & !Rank::Second & !File::A) >> 17
-				| (bitboard & !Rank::First & !Rank::Second & !File::H) >> 15
-				| (bitboard & !Rank::First & !File::A & !File::B) >> 10
-				| (bitboard & !Rank::First & !File::G & !File::H) >> 6;
+			self.knight[square] |= (bitboard
+				& !Bitboard::RANKS[Rank::R8]
+				& !Bitboard::RANKS[Rank::R7]
+				& !Bitboard::FILES[File::A])
+				<< 15 | (bitboard
+				& !Bitboard::RANKS[Rank::R8]
+				& !Bitboard::RANKS[Rank::R7]
+				& !Bitboard::FILES[File::H])
+				<< 17 | (bitboard
+				& !Bitboard::RANKS[Rank::R8]
+				& !Bitboard::FILES[File::A]
+				& !Bitboard::FILES[File::B])
+				<< 6 | (bitboard
+				& !Bitboard::RANKS[Rank::R8]
+				& !Bitboard::FILES[File::G]
+				& !Bitboard::FILES[File::H])
+				<< 10 | (bitboard
+				& !Bitboard::RANKS[Rank::R1]
+				& !Bitboard::RANKS[Rank::R2]
+				& !Bitboard::FILES[File::A])
+				>> 17 | (bitboard
+				& !Bitboard::RANKS[Rank::R1]
+				& !Bitboard::RANKS[Rank::R2]
+				& !Bitboard::FILES[File::H])
+				>> 15 | (bitboard
+				& !Bitboard::RANKS[Rank::R1]
+				& !Bitboard::FILES[File::A]
+				& !Bitboard::FILES[File::B])
+				>> 10 | (bitboard
+				& !Bitboard::RANKS[Rank::R1]
+				& !Bitboard::FILES[File::G]
+				& !Bitboard::FILES[File::H])
+				>> 6;
 		}
 	}
 
 	fn init_pawn(&mut self) {
-		for square in Square::iter() {
-			let bitboard = Bitboard::from(square);
+		for square in usize::SQUARE_RANGE {
+			let bitboard = Bitboard::SQUARES[square];
 
-			let white = (bitboard & !File::A) << 7 | (bitboard & !File::H) << 9;
-			let black = (bitboard & !File::H) >> 7 | (bitboard & !File::A) >> 9;
+			let white = (bitboard & !Bitboard::FILES[File::A]) << 7
+				| (bitboard & !Bitboard::FILES[File::H]) << 9;
+			let black = (bitboard & !Bitboard::FILES[File::H]) >> 7
+				| (bitboard & !Bitboard::FILES[File::A]) >> 9;
 
-			self.pawns[Color::White][square] = white;
-			self.pawns[Color::Black][square] = black;
+			self.pawns[Color::WHITE][square] = white;
+			self.pawns[Color::BLACK][square] = black;
 		}
 	}
 
@@ -70,14 +105,14 @@ impl MoveGen {
 	// https://github.com/mvanthoor/rustic
 	fn init_magic(&mut self, piece: Piece) {
 		let is_rook = match piece {
-			Piece::Rook(Color::Both) => true,
-			Piece::Bishop(Color::Both) => false,
-			_ => panic!("{}", Error::InvalidMagicPiece(piece)),
+			Piece::ROOK => true,
+			Piece::BISHOP => false,
+			_ => panic!("Invalid magic piece: {}", piece.piece_string(Color::BOTH)),
 		};
 
 		let mut offset = 0;
 
-		for square in Square::iter() {
+		for square in usize::SQUARE_RANGE {
 			let mask = match is_rook {
 				true => MoveGen::rook_mask(square),
 				false => MoveGen::bishop_mask(square),
@@ -94,7 +129,7 @@ impl MoveGen {
 				false => MoveGen::bishop_attacks(square, &blockers),
 			};
 
-			let mut magic = Magic {
+			let magic = Magic {
 				mask,
 				offset,
 				shift: (64 - bits) as u8,
@@ -120,7 +155,7 @@ impl MoveGen {
 
 					table[index] = attacks[next];
 				} else {
-					panic!("{}", Error::InvalidMagicAttack(table[index]));
+					panic!("Invalid magic index: {}", magic.nr);
 				}
 			}
 
