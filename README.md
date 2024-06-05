@@ -6,22 +6,22 @@ Yes Another Chess is a chess engine written in Rust. Despite its name, this ches
 
 First, build the executable file or run it directly in release mode for optimal performance:
 
-```
+```sh
 cargo build --release
 ```
 
 or
 
-```
+```sh
 cargo run --release
 ```
 
 Finally, you can display all available options and commands by running the program with the `-h` or `--help` argument:
 
-```
+```sh
 cargo run --release -h
 ```
 
-# License
+## License
 
 This project is licensed under the MIT License. See the [LICENSE](../LICENSE.md) file for details.
