@@ -19,7 +19,7 @@ cargo run --release
 Finally, you can display all available options and commands by running the program with the `-h` or `--help` argument:
 
 ```sh
-cargo run --release -h
+cargo run --release -- -h
 ```
 
 ## License
