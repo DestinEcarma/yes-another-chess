@@ -1,4 +1,4 @@
-name: lint
+name: Lint
 
 on:
     push:
@@ -9,8 +9,7 @@ on:
             - master
 
 jobs:
-    clippy:
-        name: Lint
+    lint:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
