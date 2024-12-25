@@ -29,6 +29,9 @@ pub enum Command {
 		depth: u8,
 		/// The depth to test
 		fen: Option<String>,
+		/// Use multi-threading
+		#[arg(short, long)]
+		threads: Option<usize>,
 	},
 
 	#[cfg(debug_assertions)]
@@ -64,13 +67,19 @@ pub fn display(fen: Option<String>, bitboards: bool) {
 	}
 }
 
-pub fn perft(depth: u8, fen: Option<String>) {
+pub fn perft(depth: u8, fen: Option<String>, threads: Option<usize>) {
 	let mut chess = match fen {
 		Some(fen) => Chess::from(fen.as_str()),
 		None => Chess::default(),
 	};
 
 	let start = Instant::now();
+
+	let nodes = match threads {
+		Some(threads) => chess.perft_mt(depth, threads),
+		None => chess.perft(depth),
+	};
+
 	let nodes = chess.perft(depth);
 	let elapsed = start.elapsed().as_millis();
 

@@ -5,4 +5,5 @@ edition = "2021"
 publish = false
 
 [dependencies]
+num_cpus = "1.16.0"
 rand = "0.8.4"

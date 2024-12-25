@@ -5,7 +5,7 @@ use crate::{
 
 pub type History = Vec<OldState>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct OldState {
 	pub color: Color,
 	pub en_passant: Option<Square>,

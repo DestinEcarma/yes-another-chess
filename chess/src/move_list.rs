@@ -39,4 +39,12 @@ impl MoveList {
 	pub fn get_move(&self, index: usize) -> Move {
 		self.list[index]
 	}
+
+	#[inline(always)]
+	pub fn chunks(&self, chunk_size: usize) -> Vec<Vec<Move>> {
+		self.list[..self.count]
+			.chunks(chunk_size)
+			.map(|chunk| chunk.to_vec())
+			.collect()
+	}
 }
