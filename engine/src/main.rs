@@ -11,7 +11,11 @@ fn main() {
 	match args.command {
 		None => Args::command().print_help().unwrap(),
 		Some(Command::Display { fen, bitboards }) => args::display(fen, bitboards),
-		Some(Command::Perft { depth, fen }) => args::perft(depth, fen),
+		Some(Command::Perft {
+			depth,
+			fen,
+			threads,
+		}) => args::perft(depth, fen, threads),
 		#[cfg(debug_assertions)]
 		Some(Command::Magic { piece }) => args::magic(piece),
 	}
