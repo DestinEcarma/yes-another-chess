@@ -15,7 +15,7 @@ use piece::Pieces;
 
 pub use prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Board {
 	pub pieces: BitboardPieces,
 	pub color: Color,
