@@ -4,15 +4,15 @@ mod perft;
 mod playmove;
 
 use move_list::MoveList;
-use std::fmt;
+use std::{fmt, sync::Arc};
 
 pub mod board;
 pub mod move_gen;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Chess {
 	pub board: board::Board,
-	move_gen: move_gen::MoveGen,
+	move_gen: Arc<move_gen::MoveGen>,
 	history: history::History,
 }
 
@@ -24,7 +24,7 @@ impl From<&str> for Chess {
 
 		Self {
 			board,
-			move_gen,
+			move_gen: Arc::new(move_gen),
 			history,
 		}
 	}
