@@ -1,6 +1,3 @@
-// Marcel Vanthoor
-// https://github.com/mvanthoor/rustic
-
 use crate::move_gen::Move;
 use std::mem;
 
@@ -13,6 +10,8 @@ pub struct MoveList {
 impl Default for MoveList {
 	#[inline(always)]
 	fn default() -> Self {
+		// Marcel Vanthoor
+		// https://github.com/mvanthoor/rustic
 		Self {
 			list: unsafe {
 				let block = mem::MaybeUninit::uninit();
@@ -20,6 +19,15 @@ impl Default for MoveList {
 			},
 			count: 0,
 		}
+	}
+}
+
+impl<'a> IntoIterator for &'a MoveList {
+	type Item = &'a Move;
+	type IntoIter = std::slice::Iter<'a, Move>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		self.list[..self.count].iter()
 	}
 }
 
@@ -33,11 +41,6 @@ impl MoveList {
 	#[inline(always)]
 	pub fn len(&self) -> usize {
 		self.count
-	}
-
-	#[inline(always)]
-	pub fn get_move(&self, index: usize) -> Move {
-		self.list[index]
 	}
 
 	#[inline(always)]

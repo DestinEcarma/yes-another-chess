@@ -13,10 +13,8 @@ impl Chess {
 
 		let list = self.generate_moves();
 
-		for i in 0..list.len() {
-			let m = list.get_move(i);
-
-			if self.play_move(m) {
+		for m in &list {
+			if self.play_move(*m) {
 				let move_nodes = self.perft_driver(depth - 1);
 				self.undo_move();
 
@@ -89,10 +87,8 @@ impl Chess {
 
 		let list = self.generate_moves();
 
-		for i in 0..list.len() {
-			let m = list.get_move(i);
-
-			if self.play_move(m) {
+		for m in &list {
+			if self.play_move(*m) {
 				nodes += self.perft_driver(depth - 1);
 				self.undo_move();
 			}
