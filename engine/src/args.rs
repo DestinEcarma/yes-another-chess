@@ -76,11 +76,10 @@ pub fn perft(depth: u8, fen: Option<String>, threads: Option<usize>) {
 	let start = Instant::now();
 
 	let nodes = match threads {
-		Some(threads) => chess.perft_mt(depth, threads),
-		None => chess.perft(depth),
+		Some(threads) => chess.perft(depth, threads),
+		None => chess.perft(depth, 1),
 	};
 
-	let nodes = chess.perft(depth);
 	let elapsed = start.elapsed().as_millis();
 
 	let nodes_per_seconds = match nodes.checked_div(match elapsed.checked_div(1000) {
