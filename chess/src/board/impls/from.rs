@@ -11,6 +11,12 @@ use super::{
 
 impl From<&str> for Board {
 	fn from(value: &str) -> Self {
+		Self::from((value, Arc::new(HashTable::default())))
+	}
+}
+
+impl From<(&str, Arc<HashTable>)> for Board {
+	fn from(value: (&str, Arc<HashTable>)) -> Self {
 		let mut board = Self {
 			pieces: [[Bitboard::default(); usize::PIECE_SIZE]; usize::COLOR_SIZE],
 			color: Color::WHITE,
@@ -23,9 +29,13 @@ impl From<&str> for Board {
 
 			halfmove_clock: 0,
 			fullmove_number: 1,
+
+			hash: ZobristHash::default(),
+
+			hash_table: value.1,
 		};
 
-		let tokens = value.split_whitespace().collect::<Vec<&str>>();
+		let tokens = value.0.split_whitespace().collect::<Vec<&str>>();
 
 		board.set_pieces(tokens[0]);
 		board.set_color(tokens[1]);

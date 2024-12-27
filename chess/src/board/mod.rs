@@ -8,10 +8,13 @@ pub mod file_rank;
 pub mod piece;
 pub mod pieces;
 pub mod square;
+pub mod zobrist;
 
 use bitboard::BitboardSquares;
 use color::ColorConsts;
 use piece::Pieces;
+use std::sync::Arc;
+use zobrist::{HashTable, ZobristHash};
 
 pub use prelude::*;
 
@@ -29,6 +32,10 @@ pub struct Board {
 
 	pub halfmove_clock: u8,
 	pub fullmove_number: u16,
+
+	pub hash: ZobristHash,
+
+	hash_table: Arc<HashTable>,
 }
 
 impl Default for Board {
@@ -45,6 +52,8 @@ impl Board {
 
 		self.occupancy |= Bitboard::SQUARES[square];
 		self.occupancy_color[color] |= Bitboard::SQUARES[square];
+
+		self.hash ^= self.hash_table.piece(piece, color, square);
 	}
 
 	#[inline(always)]
@@ -54,6 +63,8 @@ impl Board {
 
 		self.occupancy &= !(Bitboard::SQUARES[square]);
 		self.occupancy_color[color] &= !(Bitboard::SQUARES[square]);
+
+		self.hash ^= self.hash_table.piece(piece, color, square);
 	}
 }
 
