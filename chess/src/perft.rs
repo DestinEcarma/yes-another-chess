@@ -1,7 +1,4 @@
-use std::{
-	sync::{Arc, Mutex},
-	thread,
-};
+use std::thread::{self, JoinHandle};
 
 use crate::Chess;
 
@@ -38,6 +35,7 @@ impl Chess {
 		}
 
 		let num_cores = num_cpus::get();
+
 		if num_threads >= num_cores {
 			println!("\x1b[33m\x1b[1mWarning:\x1b[0m Number of threads exceeds cores. Using all cores.\x1b[0m");
 			num_threads = num_cores;
@@ -47,40 +45,38 @@ impl Chess {
 
 		let move_chunks = list.chunks(list.len().div_ceil(num_threads.min(list.len())));
 
-		let mut handles = Vec::new();
-		let nodes = Arc::new(Mutex::new(0usize));
+		let handles = move_chunks
+			.iter()
+			.map(|chunk| {
+				let mut chess_clone = self.clone();
 
-		handles.reserve(move_chunks.len());
+				let chunk = chunk.clone();
 
-		for chunk in move_chunks {
-			let nodes_clone = Arc::clone(&nodes);
-			let mut chess_clone = self.clone();
+				thread::spawn(move || {
+					let mut nodes = 0;
 
-			let handle = thread::spawn(move || {
-				let mut local_nodes = 0;
+					for m in chunk {
+						if chess_clone.play_move(m) {
+							let move_nodes = chess_clone.perft_driver(depth - 1);
+							chess_clone.undo_move();
 
-				for m in chunk {
-					if chess_clone.play_move(m) {
-						let move_nodes = chess_clone.perft_driver(depth - 1);
-						chess_clone.undo_move();
-
-						local_nodes += move_nodes;
-						println!("{m}: {move_nodes}");
+							nodes += move_nodes;
+							println!("{m}: {move_nodes}");
+						}
 					}
-				}
 
-				*nodes_clone.lock().unwrap() += local_nodes;
-			});
+					nodes
+				})
+			})
+			.collect::<Vec<JoinHandle<usize>>>();
 
-			handles.push(handle);
-		}
+		let mut nodes = 0;
 
 		for handle in handles {
-			handle.join().unwrap();
+			nodes += handle.join().unwrap();
 		}
 
-		let nodes = nodes.lock().unwrap();
-		*nodes
+		nodes
 	}
 
 	#[inline(always)]
