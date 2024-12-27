@@ -25,13 +25,13 @@ pub enum Command {
 	},
 	/// Does a performance test
 	Perft {
-		/// The FEN string to test
-		depth: u8,
 		/// The depth to test
 		fen: Option<String>,
 		/// Use multi-threading
 		#[arg(short, long)]
 		threads: Option<usize>,
+		depth: u8,
+		/// The FEN string to test
 	},
 
 	#[cfg(debug_assertions)]
