@@ -1,12 +1,11 @@
 use castle_right::CastleRightString;
-use file_rank::Ranks;
+use file_rank::{FileUtils, RankUtils};
 use square::SquareUtils;
 
 use super::*;
 use super::{
 	bitboard::BitboardOccupied,
 	color::{ColorConsts, ColorString},
-	file_rank::FileRankConsts,
 	piece::PieceString,
 };
 use std::fmt;
@@ -37,10 +36,10 @@ impl Board {
 	fn board_string(&self) -> String {
 		let mut board = String::from("   +---+---+---+---+---+---+---+---+\n");
 
-		for rank in usize::FILE_RANK_RANGE.rev() {
+		for rank in RankUtils::RANGE.rev() {
 			board += &format!(" {rank} ");
 
-			for file in usize::FILE_RANK_RANGE {
+			for file in FileUtils::RANGE {
 				let piece = match self.get_piece(SquareUtils::from_location(file, rank)) {
 					Some((piece, color)) => piece.piece_string(color),
 					None => " ".to_string(),
@@ -58,10 +57,10 @@ impl Board {
 	fn fen_string(&self) -> String {
 		let mut pieces = String::new();
 
-		for rank in usize::FILE_RANK_RANGE.rev() {
+		for rank in RankUtils::RANGE.rev() {
 			let mut empty = 0;
 
-			for file in usize::FILE_RANK_RANGE {
+			for file in FileUtils::RANGE {
 				let square = SquareUtils::from_location(file, rank);
 
 				match self.get_piece(square) {
@@ -81,7 +80,7 @@ impl Board {
 				pieces.push_str(&empty.to_string());
 			}
 
-			if rank > Rank::R1 {
+			if rank > RankUtils::R1 {
 				pieces += "/";
 			}
 		}

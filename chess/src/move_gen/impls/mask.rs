@@ -1,9 +1,9 @@
 use super::{AttackTable, BlockerTable, Direction, MoveGen};
 use crate::board::{
 	bitboard::{BitboardFiles, BitboardOccupied, BitboardRanks, BitboardSquares},
-	file_rank::{Files, Ranks},
+	file_rank::{FileUtils, RankUtils},
 	square::SquareUtils,
-	Bitboard, File, Rank, Square,
+	Bitboard, Square,
 };
 
 impl MoveGen {
@@ -80,10 +80,10 @@ impl MoveGen {
 		let bitboard_file = Bitboard::FILES[file];
 		let bitboard_rank = Bitboard::RANKS[rank];
 
-		(!bitboard_file & Bitboard::FILES[File::A])
-			| (!bitboard_file & Bitboard::FILES[File::H])
-			| (!bitboard_rank & Bitboard::RANKS[Rank::R1])
-			| (!bitboard_rank & Bitboard::RANKS[Rank::R8])
+		(!bitboard_file & Bitboard::FILES[FileUtils::A])
+			| (!bitboard_file & Bitboard::FILES[FileUtils::H])
+			| (!bitboard_rank & Bitboard::RANKS[RankUtils::R1])
+			| (!bitboard_rank & Bitboard::RANKS[RankUtils::R8])
 	}
 
 	fn ray(bitboard: Bitboard, mut square: Square, direction: Direction) -> Bitboard {

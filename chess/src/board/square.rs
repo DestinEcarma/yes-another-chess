@@ -1,5 +1,5 @@
 use super::{
-	file_rank::{FileString, GetFile, GetRank, RankString},
+	file_rank::{FileUtils, RankUtils},
 	File, Rank,
 };
 
@@ -89,8 +89,8 @@ impl SquareUtils {
 
 		match (chars.first(), chars.get(1)) {
 			(Some(file), Some(rank)) => {
-				let file = File::get_file(*file);
-				let rank = Rank::get_rank(*rank);
+				let file = FileUtils::from_char(*file);
+				let rank = FileUtils::from_char(*rank);
 
 				rank * 8 + file
 			}
@@ -105,6 +105,6 @@ impl SquareUtils {
 	pub fn to_string(square: Square) -> String {
 		let (file, rank) = Self::location(square);
 
-		format!("{}{}", file.file_string(), rank.rank_string())
+		format!("{}{}", FileUtils::to_char(file), RankUtils::to_char(rank))
 	}
 }

@@ -1,6 +1,8 @@
+use crate::board::file_rank::RankUtils;
+
 use super::{
-	bitboard::BitboardString, color::ColorConsts, file_rank::FileRankConsts, piece::PieceConsts,
-	square::SquareUtils, Bitboard, Color, Piece,
+	bitboard::BitboardString, color::ColorConsts, piece::PieceConsts, square::SquareUtils,
+	Bitboard, Color, Piece,
 };
 
 pub type PieceList = [Piece; SquareUtils::SIZE];
@@ -24,7 +26,7 @@ impl PrintBitboards for BitboardPieces {
 				"King", "Queen", "Rook", "Bishop", "Knight", "Pawn"
 			);
 
-			for rank in usize::FILE_RANK_RANGE.rev() {
+			for rank in RankUtils::RANGE.rev() {
 				let mut combined_line = String::new();
 
 				for (piece, line) in lines.iter().enumerate() {
