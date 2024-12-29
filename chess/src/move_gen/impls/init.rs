@@ -2,10 +2,10 @@ use super::{Magic, MoveGen, BISHOP_TABLE_SIZE, ROOK_TABLE_SIZE};
 use crate::board::{
 	bitboard::{BitboardFiles, BitboardRanks, BitboardSquares},
 	color::{ColorConsts, Colors},
-	file_rank::{Files, Ranks},
+	file_rank::{FileUtils, RankUtils},
 	piece::{PieceString, Pieces},
 	square::SquareUtils,
-	Bitboard, Color, File, Piece, Rank,
+	Bitboard, Color, Piece,
 };
 
 impl Default for MoveGen {
@@ -36,14 +36,14 @@ impl MoveGen {
 			let bitboard = Bitboard::SQUARES[square];
 
 			self.king[square] |=
-				(bitboard & !Bitboard::FILES[File::A] & !Bitboard::RANKS[Rank::R8]) << 7
-					| (bitboard & !Bitboard::RANKS[Rank::R8]) << 8
-					| (bitboard & !Bitboard::RANKS[Rank::R8] & !Bitboard::FILES[File::H]) << 9
-					| (bitboard & !Bitboard::FILES[File::H]) << 1
-					| (bitboard & !Bitboard::RANKS[Rank::R1] & !Bitboard::FILES[File::H]) >> 7
-					| (bitboard & !Bitboard::RANKS[Rank::R1]) >> 8
-					| (bitboard & !Bitboard::RANKS[Rank::R1] & !Bitboard::FILES[File::A]) >> 9
-					| (bitboard & !Bitboard::FILES[File::A]) >> 1;
+				(bitboard & !Bitboard::FILES[FileUtils::A] & !Bitboard::RANKS[RankUtils::R8]) << 7
+					| (bitboard & !Bitboard::RANKS[RankUtils::R8]) << 8
+					| (bitboard & !Bitboard::RANKS[RankUtils::R8] & !Bitboard::FILES[FileUtils::H])
+						<< 9 | (bitboard & !Bitboard::FILES[FileUtils::H]) << 1
+					| (bitboard & !Bitboard::RANKS[RankUtils::R1] & !Bitboard::FILES[FileUtils::H])
+						>> 7 | (bitboard & !Bitboard::RANKS[RankUtils::R1]) >> 8
+					| (bitboard & !Bitboard::RANKS[RankUtils::R1] & !Bitboard::FILES[FileUtils::A])
+						>> 9 | (bitboard & !Bitboard::FILES[FileUtils::A]) >> 1;
 		}
 	}
 
@@ -52,37 +52,37 @@ impl MoveGen {
 			let bitboard = Bitboard::SQUARES[square];
 
 			self.knight[square] |= (bitboard
-				& !Bitboard::RANKS[Rank::R8]
-				& !Bitboard::RANKS[Rank::R7]
-				& !Bitboard::FILES[File::A])
+				& !Bitboard::RANKS[RankUtils::R8]
+				& !Bitboard::RANKS[RankUtils::R7]
+				& !Bitboard::FILES[FileUtils::A])
 				<< 15 | (bitboard
-				& !Bitboard::RANKS[Rank::R8]
-				& !Bitboard::RANKS[Rank::R7]
-				& !Bitboard::FILES[File::H])
+				& !Bitboard::RANKS[RankUtils::R8]
+				& !Bitboard::RANKS[RankUtils::R7]
+				& !Bitboard::FILES[FileUtils::H])
 				<< 17 | (bitboard
-				& !Bitboard::RANKS[Rank::R8]
-				& !Bitboard::FILES[File::A]
-				& !Bitboard::FILES[File::B])
+				& !Bitboard::RANKS[RankUtils::R8]
+				& !Bitboard::FILES[FileUtils::A]
+				& !Bitboard::FILES[FileUtils::B])
 				<< 6 | (bitboard
-				& !Bitboard::RANKS[Rank::R8]
-				& !Bitboard::FILES[File::G]
-				& !Bitboard::FILES[File::H])
+				& !Bitboard::RANKS[RankUtils::R8]
+				& !Bitboard::FILES[FileUtils::G]
+				& !Bitboard::FILES[FileUtils::H])
 				<< 10 | (bitboard
-				& !Bitboard::RANKS[Rank::R1]
-				& !Bitboard::RANKS[Rank::R2]
-				& !Bitboard::FILES[File::A])
+				& !Bitboard::RANKS[RankUtils::R1]
+				& !Bitboard::RANKS[RankUtils::R2]
+				& !Bitboard::FILES[FileUtils::A])
 				>> 17 | (bitboard
-				& !Bitboard::RANKS[Rank::R1]
-				& !Bitboard::RANKS[Rank::R2]
-				& !Bitboard::FILES[File::H])
+				& !Bitboard::RANKS[RankUtils::R1]
+				& !Bitboard::RANKS[RankUtils::R2]
+				& !Bitboard::FILES[FileUtils::H])
 				>> 15 | (bitboard
-				& !Bitboard::RANKS[Rank::R1]
-				& !Bitboard::FILES[File::A]
-				& !Bitboard::FILES[File::B])
+				& !Bitboard::RANKS[RankUtils::R1]
+				& !Bitboard::FILES[FileUtils::A]
+				& !Bitboard::FILES[FileUtils::B])
 				>> 10 | (bitboard
-				& !Bitboard::RANKS[Rank::R1]
-				& !Bitboard::FILES[File::G]
-				& !Bitboard::FILES[File::H])
+				& !Bitboard::RANKS[RankUtils::R1]
+				& !Bitboard::FILES[FileUtils::G]
+				& !Bitboard::FILES[FileUtils::H])
 				>> 6;
 		}
 	}
@@ -91,10 +91,10 @@ impl MoveGen {
 		for square in SquareUtils::RANGE {
 			let bitboard = Bitboard::SQUARES[square];
 
-			let white = (bitboard & !Bitboard::FILES[File::A]) << 7
-				| (bitboard & !Bitboard::FILES[File::H]) << 9;
-			let black = (bitboard & !Bitboard::FILES[File::H]) >> 7
-				| (bitboard & !Bitboard::FILES[File::A]) >> 9;
+			let white = (bitboard & !Bitboard::FILES[FileUtils::A]) << 7
+				| (bitboard & !Bitboard::FILES[FileUtils::H]) << 9;
+			let black = (bitboard & !Bitboard::FILES[FileUtils::H]) >> 7
+				| (bitboard & !Bitboard::FILES[FileUtils::A]) >> 9;
 
 			self.pawns[Color::WHITE][square] = white;
 			self.pawns[Color::BLACK][square] = black;

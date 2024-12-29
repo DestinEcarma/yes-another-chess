@@ -10,10 +10,10 @@ use crate::{
 		bitboard::{BitboardLSB, BitboardOccupied, BitboardRanks, BitboardSquares},
 		castle_right::CastleRights,
 		color::{ColorConsts, ColorString, Colors},
-		file_rank::Ranks,
+		file_rank::RankUtils,
 		piece::{PiecePromotions, Pieces},
 		square::SquareUtils,
-		Bitboard, Board, CastleRight, Color, Piece, Rank, Square,
+		Bitboard, Board, CastleRight, Color, Piece, Square,
 	},
 	move_list::MoveList,
 };
@@ -119,8 +119,8 @@ impl MoveGen {
 		let empty = !board.occupancy;
 
 		let fourth = match color {
-			Color::WHITE => Rank::R4,
-			Color::BLACK => Rank::R5,
+			Color::WHITE => RankUtils::R4,
+			Color::BLACK => RankUtils::R5,
 			_ => panic!("Invalid color: {}", color.color_string()),
 		};
 
@@ -255,8 +255,8 @@ impl MoveGen {
 		let is_pawn = Piece::PAWN == piece;
 
 		let promotion_rank = match color {
-			Color::WHITE => Rank::R8,
-			Color::BLACK => Rank::R1,
+			Color::WHITE => RankUtils::R8,
+			Color::BLACK => RankUtils::R1,
 			_ => panic!("Invalid color: {}", color.color_string()),
 		};
 

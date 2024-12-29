@@ -1,11 +1,11 @@
 use bitboard::BitboardLSB;
 use castle_right::GetCastleRight;
+use file_rank::{FileUtils, RankUtils};
 use square::SquareUtils;
 
 use super::*;
 use super::{
 	color::{ColorConsts, Colors, GetColor},
-	file_rank::{Files, Ranks},
 	piece::{GetPiece, PieceConsts},
 };
 
@@ -93,14 +93,14 @@ struct BoardBuilder;
 
 impl BoardBuilder {
 	fn set_pieces(board: &mut Board, pieces: &str) {
-		let mut rank = Rank::R8;
-		let mut file = File::A;
+		let mut rank = RankUtils::R8;
+		let mut file = FileUtils::A;
 
 		for ch in pieces.chars() {
 			match ch {
 				'/' => {
 					rank -= 1;
-					file = File::A;
+					file = FileUtils::A;
 				}
 				'1'..='8' => {
 					for _ in 0..ch.to_digit(10).unwrap() {
