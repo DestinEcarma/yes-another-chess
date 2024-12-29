@@ -8,10 +8,13 @@ pub mod file_rank;
 pub mod piece;
 pub mod pieces;
 pub mod square;
+pub mod zobrist;
 
 use bitboard::BitboardSquares;
 use color::ColorConsts;
 use piece::Pieces;
+use std::sync::Arc;
+use zobrist::{HashTable, ZobristHash};
 
 pub use prelude::*;
 
@@ -29,6 +32,10 @@ pub struct Board {
 
 	pub halfmove_clock: u8,
 	pub fullmove_number: u16,
+
+	pub hash: ZobristHash,
+
+	hash_table: Arc<HashTable>,
 }
 
 impl Default for Board {
@@ -45,6 +52,8 @@ impl Board {
 
 		self.occupancy |= Bitboard::SQUARES[square];
 		self.occupancy_color[color] |= Bitboard::SQUARES[square];
+
+		self.hash ^= self.hash_table.piece(piece, color, square);
 	}
 
 	#[inline(always)]
@@ -54,6 +63,36 @@ impl Board {
 
 		self.occupancy &= !(Bitboard::SQUARES[square]);
 		self.occupancy_color[color] &= !(Bitboard::SQUARES[square]);
+
+		self.hash ^= self.hash_table.piece(piece, color, square);
+	}
+
+	#[inline(always)]
+	pub fn switch_color(&mut self) {
+		self.hash ^= self.hash_table.color(self.color);
+		self.color ^= 1;
+		self.hash ^= self.hash_table.color(self.color);
+	}
+
+	#[inline(always)]
+	pub fn update_castle_rights(&mut self, castle_rights: CastleRight) {
+		self.hash ^= self.hash_table.castle(self.castle_rights);
+		self.castle_rights = castle_rights;
+		self.hash ^= self.hash_table.castle(self.castle_rights);
+	}
+
+	#[inline(always)]
+	pub fn set_en_passant(&mut self, square: Square) {
+		self.en_passant = Some(square);
+		self.hash ^= self.hash_table.en_passant(square);
+	}
+
+	#[inline(always)]
+	pub fn clear_en_passant(&mut self) {
+		if let Some(en_passant) = self.en_passant {
+			self.hash ^= self.hash_table.en_passant(en_passant);
+			self.en_passant = None;
+		}
 	}
 }
 

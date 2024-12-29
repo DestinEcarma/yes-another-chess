@@ -89,13 +89,11 @@ impl Board {
 
 		let color = self.color.color_string();
 		let castle_rights = &self.castle_rights.castle_right_string();
-		let en_passant: String;
 
-		if let Some(square) = self.en_passant {
-			en_passant = square.square_string();
-		} else {
-			en_passant = String::from("-");
-		}
+		let en_passant = match self.en_passant {
+			Some(square) => square.square_string(),
+			None => "-".to_string(),
+		};
 
 		let halfmove_clock = self.halfmove_clock;
 		let fullmove_number = self.fullmove_number;

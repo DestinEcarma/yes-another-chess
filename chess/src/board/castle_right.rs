@@ -2,6 +2,10 @@ use super::{square::SquareConsts, square::Squares, Square};
 
 pub type CastleRight = u8;
 
+pub trait CastleRightConsts {
+	const CASTLE_RIGHT_SIZE: usize = 16;
+}
+
 pub trait CastleRights {
 	const NONE: CastleRight = 0;
 	const WHITE_KING: CastleRight = 1;
@@ -30,6 +34,7 @@ pub trait CastleRightSquares {
 	};
 }
 
+impl CastleRightConsts for CastleRight {}
 impl CastleRights for CastleRight {}
 impl CastleRightSquares for CastleRight {}
 

@@ -25,13 +25,17 @@ pub enum Command {
 	},
 	/// Does a performance test
 	Perft {
-		/// The FEN string to test
-		depth: u8,
 		/// The depth to test
-		fen: Option<String>,
-		/// Use multi-threading
-		#[arg(short, long)]
-		threads: Option<usize>,
+		depth: u8,
+		/// The FEN string to test
+		#[arg(default_value = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
+		fen: String,
+		/// Use multi-threading, e.g. 4
+		#[arg(short, long, default_value = "1")]
+		threads: usize,
+		/// Use hashing, e.g. 1024kb, 1024mb or 1gb
+		#[arg(long)]
+		hash: Option<String>,
 	},
 
 	#[cfg(debug_assertions)]
@@ -67,29 +71,12 @@ pub fn display(fen: Option<String>, bitboards: bool) {
 	}
 }
 
-pub fn perft(depth: u8, fen: Option<String>, threads: Option<usize>) {
-	let mut chess = match fen {
-		Some(fen) => Chess::from(fen.as_str()),
-		None => Chess::default(),
-	};
+pub fn perft(depth: u8, fen: String, threads: usize, hash: Option<String>) {
+	let mut chess = Chess::from(fen.as_str());
 
-	let start = Instant::now();
+	let (nodes, elapsed) = chess.perft(depth, threads, hash.and_then(to_bytes));
 
-	let nodes = match threads {
-		Some(threads) => chess.perft_mt(depth, threads),
-		None => chess.perft(depth),
-	};
-
-	let nodes = chess.perft(depth);
-	let elapsed = start.elapsed().as_millis();
-
-	let nodes_per_seconds = match nodes.checked_div(match elapsed.checked_div(1000) {
-		Some(num) => num as usize,
-		None => 1,
-	}) {
-		Some(nodes) => nodes,
-		None => nodes,
-	};
+	let nodes_per_seconds = (nodes as f64 / (elapsed as f64 / 1000f64)).floor();
 
 	println!("\nTotal Time (ms)\t: {elapsed}");
 	println!("Nodes searched\t: {nodes}");
@@ -106,4 +93,30 @@ pub fn magic(piece: MagicPiece) {
 	};
 
 	Magic::generate(piece);
+}
+
+fn to_bytes(size: String) -> Option<usize> {
+	let size = size.trim().to_lowercase();
+	let (value_str, unit) = size.split_at(size.len() - 2);
+
+	let value = match value_str.parse::<usize>() {
+		Ok(value) => value,
+		Err(_) => return None,
+	};
+
+	if value < 1 {
+		println!("Warning: Invalid size. No hashing will be used. Use a positive integer.");
+		return None;
+	}
+
+	match unit {
+		"kb" => Some(value * 1024),
+		"mb" => Some(value * 1024 * 1024),
+		"gb" => Some(value * 1024 * 1024 * 1024),
+
+		_ => {
+			println!("Warning: Invalid unit. No hashing will be used. Use 'kb', 'mb' or 'gb'.");
+			None
+		}
+	}
 }
