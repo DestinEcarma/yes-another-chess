@@ -2,48 +2,42 @@ use super::square::SquareUtils;
 
 pub type CastleRight = u8;
 
-pub trait CastleRightConsts {
-	const CASTLE_RIGHT_SIZE: usize = 16;
+pub struct CastleRightUtils;
+
+impl CastleRightUtils {
+	pub const SIZE: usize = 16;
 }
 
-pub trait CastleRights {
-	const NONE: CastleRight = 0;
-	const WHITE_KING: CastleRight = 1;
-	const WHITE_QUEEN: CastleRight = 2;
-	const BLACK_KING: CastleRight = 4;
-	const BLACK_QUEEN: CastleRight = 8;
-	const ALL: CastleRight = 15;
+impl CastleRightUtils {
+	pub const NONE: CastleRight = 0;
+	pub const WHITE_KING: CastleRight = 1;
+	pub const WHITE_QUEEN: CastleRight = 2;
+	pub const BLACK_KING: CastleRight = 4;
+	pub const BLACK_QUEEN: CastleRight = 8;
+	pub const ALL: CastleRight = 15;
 
-	const WHITE: CastleRight = Self::WHITE_KING | Self::WHITE_QUEEN;
-	const BLACK: CastleRight = Self::BLACK_KING | Self::BLACK_QUEEN;
+	pub const WHITE: CastleRight = Self::WHITE_KING | Self::WHITE_QUEEN;
+	pub const BLACK: CastleRight = Self::BLACK_KING | Self::BLACK_QUEEN;
 }
 
-pub trait CastleRightSquares {
-	const SQUARES: [CastleRight; SquareUtils::SIZE] = {
-		let mut squares = [CastleRight::NONE; SquareUtils::SIZE];
+impl CastleRightUtils {
+	pub const SQUARES: [CastleRight; SquareUtils::SIZE] = {
+		let mut squares = [Self::NONE; SquareUtils::SIZE];
 
-		squares[SquareUtils::A1] = CastleRight::WHITE_QUEEN;
-		squares[SquareUtils::E1] = CastleRight::WHITE_KING | CastleRight::WHITE_QUEEN;
-		squares[SquareUtils::H1] = CastleRight::WHITE_KING;
+		squares[SquareUtils::A1] = Self::WHITE_QUEEN;
+		squares[SquareUtils::E1] = Self::WHITE_KING | Self::WHITE_QUEEN;
+		squares[SquareUtils::H1] = Self::WHITE_KING;
 
-		squares[SquareUtils::A8] = CastleRight::BLACK_QUEEN;
-		squares[SquareUtils::E8] = CastleRight::BLACK_KING | CastleRight::BLACK_QUEEN;
-		squares[SquareUtils::H8] = CastleRight::BLACK_KING;
+		squares[SquareUtils::A8] = Self::BLACK_QUEEN;
+		squares[SquareUtils::E8] = Self::BLACK_KING | Self::BLACK_QUEEN;
+		squares[SquareUtils::H8] = Self::BLACK_KING;
 
 		squares
 	};
 }
 
-impl CastleRightConsts for CastleRight {}
-impl CastleRights for CastleRight {}
-impl CastleRightSquares for CastleRight {}
-
-pub trait GetCastleRight<T> {
-	fn get_castle_right(value: T) -> Self;
-}
-
-impl GetCastleRight<char> for CastleRight {
-	fn get_castle_right(value: char) -> Self {
+impl CastleRightUtils {
+	pub fn parse(value: char) -> CastleRight {
 		match value {
 			'K' => Self::WHITE_KING,
 			'Q' => Self::WHITE_QUEEN,
@@ -52,26 +46,20 @@ impl GetCastleRight<char> for CastleRight {
 			_ => panic!("Invalid castle right: {}", value),
 		}
 	}
-}
 
-pub trait CastleRightString {
-	fn castle_right_string(&self) -> String;
-}
-
-impl CastleRightString for CastleRight {
-	fn castle_right_string(&self) -> String {
+	pub fn to_string(castle_right: CastleRight) -> String {
 		let mut result = String::new();
 
-		if self & CastleRight::WHITE_KING > 0 {
+		if castle_right & Self::WHITE_KING > 0 {
 			result.push('K');
 		}
-		if self & CastleRight::WHITE_QUEEN > 0 {
+		if castle_right & Self::WHITE_QUEEN > 0 {
 			result.push('Q');
 		}
-		if self & CastleRight::BLACK_KING > 0 {
+		if castle_right & Self::BLACK_KING > 0 {
 			result.push('k');
 		}
-		if self & CastleRight::BLACK_QUEEN > 0 {
+		if castle_right & Self::BLACK_QUEEN > 0 {
 			result.push('q');
 		}
 

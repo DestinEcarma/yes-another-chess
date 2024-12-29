@@ -1,4 +1,4 @@
-use castle_right::CastleRightString;
+use castle_right::CastleRightUtils;
 use file_rank::{FileUtils, RankUtils};
 use square::SquareUtils;
 
@@ -82,7 +82,7 @@ impl Board {
 		}
 
 		let color = ColorUtils::to_string(self.color);
-		let castle_rights = &self.castle_rights.castle_right_string();
+		let castle_rights = CastleRightUtils::to_string(self.castle_rights);
 
 		let en_passant = match self.en_passant {
 			Some(square) => SquareUtils::to_string(square),

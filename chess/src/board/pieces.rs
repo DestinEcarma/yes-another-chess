@@ -22,10 +22,10 @@ impl PrintBitboards for BitboardPieces {
 
 			let mut output = format!(
 				"\n{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}",
-				"King", "Queen", "Rook", "Bishop", "Knight", "Pawn"
+				"Pawn", "Knight", "Bishop", "Rook", "Queen", "King"
 			);
 
-			for rank in RankUtils::RANGE.rev() {
+			for rank in RankUtils::RANGE {
 				let mut combined_line = String::new();
 
 				for (piece, line) in lines.iter().enumerate() {

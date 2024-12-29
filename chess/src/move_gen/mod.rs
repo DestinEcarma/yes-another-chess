@@ -8,12 +8,12 @@ mod prelude;
 use crate::{
 	board::{
 		bitboard::BitboardUtils,
-		castle_right::CastleRights,
+		castle_right::CastleRightUtils,
 		color::ColorUtils,
 		file_rank::RankUtils,
 		piece::{PiecePromotions, Pieces},
 		square::SquareUtils,
-		Bitboard, Board, CastleRight, Piece, Square,
+		Bitboard, Board, Piece, Square,
 	},
 	move_list::MoveList,
 };
@@ -163,8 +163,8 @@ impl MoveGen {
 
 		let rights = board.castle_rights;
 
-		if color == ColorUtils::WHITE && rights & CastleRight::WHITE > 0 {
-			if rights & CastleRight::WHITE_KING > 0 {
+		if color == ColorUtils::WHITE && rights & CastleRightUtils::WHITE > 0 {
+			if rights & CastleRightUtils::WHITE_KING > 0 {
 				let blockers = BitboardUtils::SQUARES[SquareUtils::F1]
 					| BitboardUtils::SQUARES[SquareUtils::G1];
 
@@ -182,7 +182,7 @@ impl MoveGen {
 				}
 			}
 
-			if rights & CastleRight::WHITE_QUEEN > 0 {
+			if rights & CastleRightUtils::WHITE_QUEEN > 0 {
 				let blockers = BitboardUtils::SQUARES[SquareUtils::D1]
 					| BitboardUtils::SQUARES[SquareUtils::C1]
 					| BitboardUtils::SQUARES[SquareUtils::B1];
@@ -200,8 +200,8 @@ impl MoveGen {
 					);
 				}
 			}
-		} else if color == ColorUtils::BLACK && rights & CastleRight::BLACK > 0 {
-			if rights & CastleRight::BLACK_KING > 0 {
+		} else if color == ColorUtils::BLACK && rights & CastleRightUtils::BLACK > 0 {
+			if rights & CastleRightUtils::BLACK_KING > 0 {
 				let blockers = BitboardUtils::SQUARES[SquareUtils::F8]
 					| BitboardUtils::SQUARES[SquareUtils::G8];
 
@@ -219,7 +219,7 @@ impl MoveGen {
 				}
 			}
 
-			if rights & CastleRight::BLACK_QUEEN > 0 {
+			if rights & CastleRightUtils::BLACK_QUEEN > 0 {
 				let blockers = BitboardUtils::SQUARES[SquareUtils::D8]
 					| BitboardUtils::SQUARES[SquareUtils::C8]
 					| BitboardUtils::SQUARES[SquareUtils::B8];
