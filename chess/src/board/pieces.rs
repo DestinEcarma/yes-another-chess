@@ -1,9 +1,9 @@
 use super::{
 	bitboard::BitboardString, color::ColorConsts, file_rank::FileRankConsts, piece::PieceConsts,
-	square::SquareConsts, Bitboard, Color, Piece,
+	square::SquareUtils, Bitboard, Color, Piece,
 };
 
-pub type PieceList = [Piece; usize::SQUARE_SIZE];
+pub type PieceList = [Piece; SquareUtils::SIZE];
 pub type BitboardPieces = [[Bitboard; usize::PIECE_SIZE]; usize::COLOR_SIZE];
 
 pub trait PrintBitboards {

@@ -1,13 +1,12 @@
 use bitboard::BitboardLSB;
 use castle_right::GetCastleRight;
-use square::GetSquare;
+use square::SquareUtils;
 
 use super::*;
 use super::{
 	color::{ColorConsts, Colors, GetColor},
 	file_rank::{Files, Ranks},
 	piece::{GetPiece, PieceConsts},
-	square::SquareConsts,
 };
 
 impl From<&str> for Board {
@@ -24,7 +23,7 @@ impl From<(&str, Arc<HashTable>)> for Board {
 			en_passant: None,
 			castle_rights: CastleRight::default(),
 
-			piece_list: [Piece::NONE; usize::SQUARE_SIZE],
+			piece_list: [Piece::NONE; SquareUtils::SIZE],
 			occupancy: Bitboard::default(),
 			occupancy_color: [Bitboard::default(); usize::COLOR_SIZE],
 
@@ -112,7 +111,7 @@ impl BoardBuilder {
 					board.add_piece(
 						Piece::get_piece(ch),
 						Color::get_color(ch.is_uppercase()),
-						Square::get_square((file, rank)),
+						SquareUtils::from_location(file, rank),
 					);
 					file += 1;
 				}
@@ -138,7 +137,7 @@ impl BoardBuilder {
 
 	fn set_en_passant(board: &mut Board, en_passant: &str) {
 		if en_passant != "-" {
-			board.en_passant = Some(Square::get_square(en_passant));
+			board.en_passant = Some(SquareUtils::parse(en_passant));
 		}
 	}
 }

@@ -4,8 +4,8 @@ use crate::{
 		castle_right::{CastleRightSquares, CastleRights},
 		color::Colors,
 		piece::Pieces,
-		square::{SquareString, Squares},
-		CastleRight, Color, Piece, Square,
+		square::SquareUtils,
+		CastleRight, Color, Piece,
 	},
 	history::OldState,
 	move_gen::Move,
@@ -74,23 +74,23 @@ impl Chess {
 
 			if m.castling() {
 				match to {
-					Square::G1 => {
-						board.remove_piece(Piece::ROOK, color, Square::H1);
-						board.add_piece(Piece::ROOK, color, Square::F1);
+					SquareUtils::G1 => {
+						board.remove_piece(Piece::ROOK, color, SquareUtils::H1);
+						board.add_piece(Piece::ROOK, color, SquareUtils::F1);
 					}
-					Square::C1 => {
-						board.remove_piece(Piece::ROOK, color, Square::A1);
-						board.add_piece(Piece::ROOK, color, Square::D1);
+					SquareUtils::C1 => {
+						board.remove_piece(Piece::ROOK, color, SquareUtils::A1);
+						board.add_piece(Piece::ROOK, color, SquareUtils::D1);
 					}
-					Square::G8 => {
-						board.remove_piece(Piece::ROOK, color, Square::H8);
-						board.add_piece(Piece::ROOK, color, Square::F8);
+					SquareUtils::G8 => {
+						board.remove_piece(Piece::ROOK, color, SquareUtils::H8);
+						board.add_piece(Piece::ROOK, color, SquareUtils::F8);
 					}
-					Square::C8 => {
-						board.remove_piece(Piece::ROOK, color, Square::A8);
-						board.add_piece(Piece::ROOK, color, Square::D8);
+					SquareUtils::C8 => {
+						board.remove_piece(Piece::ROOK, color, SquareUtils::A8);
+						board.add_piece(Piece::ROOK, color, SquareUtils::D8);
 					}
-					_ => panic!("Invalid castling move: {}", to.square_string()),
+					_ => panic!("Invalid castling move: {}", SquareUtils::to_string(to)),
 				}
 			}
 		}
@@ -141,23 +141,23 @@ impl Chess {
 
 				if m.castling() {
 					match to {
-						Square::G1 => {
-							board.remove_piece(Piece::ROOK, color, Square::F1);
-							board.add_piece(Piece::ROOK, color, Square::H1);
+						SquareUtils::G1 => {
+							board.remove_piece(Piece::ROOK, color, SquareUtils::F1);
+							board.add_piece(Piece::ROOK, color, SquareUtils::H1);
 						}
-						Square::C1 => {
-							board.remove_piece(Piece::ROOK, color, Square::D1);
-							board.add_piece(Piece::ROOK, color, Square::A1);
+						SquareUtils::C1 => {
+							board.remove_piece(Piece::ROOK, color, SquareUtils::D1);
+							board.add_piece(Piece::ROOK, color, SquareUtils::A1);
 						}
-						Square::G8 => {
-							board.remove_piece(Piece::ROOK, color, Square::F8);
-							board.add_piece(Piece::ROOK, color, Square::H8);
+						SquareUtils::G8 => {
+							board.remove_piece(Piece::ROOK, color, SquareUtils::F8);
+							board.add_piece(Piece::ROOK, color, SquareUtils::H8);
 						}
-						Square::C8 => {
-							board.remove_piece(Piece::ROOK, color, Square::D8);
-							board.add_piece(Piece::ROOK, color, Square::A8);
+						SquareUtils::C8 => {
+							board.remove_piece(Piece::ROOK, color, SquareUtils::D8);
+							board.add_piece(Piece::ROOK, color, SquareUtils::A8);
 						}
-						_ => panic!("Invalid castling move: {}", to.square_string()),
+						_ => panic!("Invalid castling move: {}", SquareUtils::to_string(to)),
 					}
 				}
 			} else {

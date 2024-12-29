@@ -1,8 +1,4 @@
-use super::{
-	file_rank::FileRankConsts,
-	square::{GetSquare, SquareConsts},
-	File, Rank, Square,
-};
+use super::{file_rank::FileRankConsts, square::SquareUtils, File, Rank, Square};
 
 pub type Bitboard = u64;
 
@@ -24,7 +20,7 @@ pub trait BitboardRanks {
 
 pub trait BitboardSquares {
 	#[rustfmt::skip]
-	const SQUARES: [Bitboard; usize::SQUARE_SIZE] = [
+	const SQUARES: [Bitboard; SquareUtils::SIZE] = [
 		0x0000000000000001, 0x0000000000000002, 0x0000000000000004, 0x0000000000000008,
 		0x0000000000000010, 0x0000000000000020, 0x0000000000000040, 0x0000000000000080,
 		0x0000000000000100, 0x0000000000000200, 0x0000000000000400, 0x0000000000000800,
@@ -88,7 +84,7 @@ impl BitboardString for Bitboard {
 
 		for rank in Rank::FILE_RANK_RANGE.rev() {
 			for file in File::FILE_RANK_RANGE {
-				let square = usize::get_square((file, rank));
+				let square = SquareUtils::from_location(file, rank);
 
 				string.push_str(match self.occupied(square) {
 					true => "1 ",

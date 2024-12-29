@@ -1,4 +1,4 @@
-use super::{square::SquareConsts, square::Squares, Square};
+use super::square::SquareUtils;
 
 pub type CastleRight = u8;
 
@@ -19,16 +19,16 @@ pub trait CastleRights {
 }
 
 pub trait CastleRightSquares {
-	const SQUARES: [CastleRight; usize::SQUARE_SIZE] = {
-		let mut squares = [CastleRight::NONE; usize::SQUARE_SIZE];
+	const SQUARES: [CastleRight; SquareUtils::SIZE] = {
+		let mut squares = [CastleRight::NONE; SquareUtils::SIZE];
 
-		squares[Square::A1] = CastleRight::WHITE_QUEEN;
-		squares[Square::E1] = CastleRight::WHITE_KING | CastleRight::WHITE_QUEEN;
-		squares[Square::H1] = CastleRight::WHITE_KING;
+		squares[SquareUtils::A1] = CastleRight::WHITE_QUEEN;
+		squares[SquareUtils::E1] = CastleRight::WHITE_KING | CastleRight::WHITE_QUEEN;
+		squares[SquareUtils::H1] = CastleRight::WHITE_KING;
 
-		squares[Square::A8] = CastleRight::BLACK_QUEEN;
-		squares[Square::E8] = CastleRight::BLACK_KING | CastleRight::BLACK_QUEEN;
-		squares[Square::H8] = CastleRight::BLACK_KING;
+		squares[SquareUtils::A8] = CastleRight::BLACK_QUEEN;
+		squares[SquareUtils::E8] = CastleRight::BLACK_KING | CastleRight::BLACK_QUEEN;
+		squares[SquareUtils::H8] = CastleRight::BLACK_KING;
 
 		squares
 	};

@@ -4,20 +4,20 @@ use crate::board::{
 	color::{ColorConsts, Colors},
 	file_rank::{Files, Ranks},
 	piece::{PieceString, Pieces},
-	square::SquareConsts,
+	square::SquareUtils,
 	Bitboard, Color, File, Piece, Rank,
 };
 
 impl Default for MoveGen {
 	fn default() -> Self {
 		let mut move_gen = Self {
-			king: [Bitboard::default(); usize::SQUARE_SIZE],
+			king: [Bitboard::default(); SquareUtils::SIZE],
 			rooks: vec![Bitboard::default(); ROOK_TABLE_SIZE],
 			bishops: vec![Bitboard::default(); BISHOP_TABLE_SIZE],
-			rook_magics: [Magic::default(); usize::SQUARE_SIZE],
-			bishop_magics: [Magic::default(); usize::SQUARE_SIZE],
-			knight: [Bitboard::default(); usize::SQUARE_SIZE],
-			pawns: [[Bitboard::default(); usize::SQUARE_SIZE]; usize::COLOR_SIZE],
+			rook_magics: [Magic::default(); SquareUtils::SIZE],
+			bishop_magics: [Magic::default(); SquareUtils::SIZE],
+			knight: [Bitboard::default(); SquareUtils::SIZE],
+			pawns: [[Bitboard::default(); SquareUtils::SIZE]; usize::COLOR_SIZE],
 		};
 
 		move_gen.init_king();
@@ -32,7 +32,7 @@ impl Default for MoveGen {
 
 impl MoveGen {
 	fn init_king(&mut self) {
-		for square in usize::SQUARE_RANGE {
+		for square in SquareUtils::RANGE {
 			let bitboard = Bitboard::SQUARES[square];
 
 			self.king[square] |=
@@ -48,7 +48,7 @@ impl MoveGen {
 	}
 
 	fn init_knight(&mut self) {
-		for square in usize::SQUARE_RANGE {
+		for square in SquareUtils::RANGE {
 			let bitboard = Bitboard::SQUARES[square];
 
 			self.knight[square] |= (bitboard
@@ -88,7 +88,7 @@ impl MoveGen {
 	}
 
 	fn init_pawn(&mut self) {
-		for square in usize::SQUARE_RANGE {
+		for square in SquareUtils::RANGE {
 			let bitboard = Bitboard::SQUARES[square];
 
 			let white = (bitboard & !Bitboard::FILES[File::A]) << 7
@@ -112,7 +112,7 @@ impl MoveGen {
 
 		let mut offset = 0;
 
-		for square in usize::SQUARE_RANGE {
+		for square in SquareUtils::RANGE {
 			let mask = match is_rook {
 				true => MoveGen::rook_mask(square),
 				false => MoveGen::bishop_mask(square),
