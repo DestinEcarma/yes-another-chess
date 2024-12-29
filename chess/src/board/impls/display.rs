@@ -2,11 +2,8 @@ use castle_right::CastleRightString;
 use file_rank::{FileUtils, RankUtils};
 use square::SquareUtils;
 
+use super::piece::PieceString;
 use super::*;
-use super::{
-	color::{ColorConsts, ColorString},
-	piece::PieceString,
-};
 use std::fmt;
 
 impl fmt::Display for Board {
@@ -22,7 +19,7 @@ impl Board {
 		if piece == Piece::NONE {
 			None
 		} else {
-			for color in Color::COLOR_RANGE {
+			for color in ColorUtils::RANGE {
 				if BitboardUtils::occupied(self.pieces[color][piece], square) {
 					return Some((piece, color));
 				}
@@ -84,7 +81,7 @@ impl Board {
 			}
 		}
 
-		let color = self.color.color_string();
+		let color = ColorUtils::to_string(self.color);
 		let castle_rights = &self.castle_rights.castle_right_string();
 
 		let en_passant = match self.en_passant {

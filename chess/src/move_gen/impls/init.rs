@@ -1,11 +1,11 @@
 use super::{Magic, MoveGen, BISHOP_TABLE_SIZE, ROOK_TABLE_SIZE};
 use crate::board::{
 	bitboard::BitboardUtils,
-	color::{ColorConsts, Colors},
+	color::ColorUtils,
 	file_rank::{FileUtils, RankUtils},
 	piece::{PieceString, Pieces},
 	square::SquareUtils,
-	Color, Piece,
+	Piece,
 };
 
 impl Default for MoveGen {
@@ -17,7 +17,7 @@ impl Default for MoveGen {
 			rook_magics: [Magic::default(); SquareUtils::SIZE],
 			bishop_magics: [Magic::default(); SquareUtils::SIZE],
 			knight: [BitboardUtils::EMPTY; SquareUtils::SIZE],
-			pawns: [[BitboardUtils::EMPTY; SquareUtils::SIZE]; usize::COLOR_SIZE],
+			pawns: [[BitboardUtils::EMPTY; SquareUtils::SIZE]; ColorUtils::SIZE],
 		};
 
 		move_gen.init_king();
@@ -103,8 +103,8 @@ impl MoveGen {
 			let black = (bitboard & !BitboardUtils::FILES[FileUtils::H]) >> 7
 				| (bitboard & !BitboardUtils::FILES[FileUtils::A]) >> 9;
 
-			self.pawns[Color::WHITE][square] = white;
-			self.pawns[Color::BLACK][square] = black;
+			self.pawns[ColorUtils::WHITE][square] = white;
+			self.pawns[ColorUtils::BLACK][square] = black;
 		}
 	}
 
@@ -114,7 +114,10 @@ impl MoveGen {
 		let is_rook = match piece {
 			Piece::ROOK => true,
 			Piece::BISHOP => false,
-			_ => panic!("Invalid magic piece: {}", piece.piece_string(Color::BOTH)),
+			_ => panic!(
+				"Invalid magic piece: {}",
+				piece.piece_string(ColorUtils::BOTH)
+			),
 		};
 
 		let mut offset = 0;

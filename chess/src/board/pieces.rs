@@ -1,9 +1,9 @@
 use crate::board::{bitboard::BitboardUtils, file_rank::RankUtils};
 
-use super::{color::ColorConsts, piece::PieceConsts, square::SquareUtils, Bitboard, Color, Piece};
+use super::{color::ColorUtils, piece::PieceConsts, square::SquareUtils, Bitboard, Color, Piece};
 
 pub type PieceList = [Piece; SquareUtils::SIZE];
-pub type BitboardPieces = [[Bitboard; usize::PIECE_SIZE]; usize::COLOR_SIZE];
+pub type BitboardPieces = [[Bitboard; usize::PIECE_SIZE]; ColorUtils::SIZE];
 
 pub trait PrintBitboards {
 	fn print_bitboards(&self, color: Color);

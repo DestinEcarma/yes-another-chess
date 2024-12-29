@@ -1,53 +1,39 @@
 pub type Color = usize;
 
-pub trait Colors {
-	const WHITE: Color = 0;
-	const BLACK: Color = 1;
-	const BOTH: Color = 2;
+pub struct ColorUtils;
+
+impl ColorUtils {
+	pub const SIZE: usize = 2;
+	pub const RANGE: std::ops::Range<Color> = 0..Self::SIZE;
 }
 
-pub trait ColorConsts {
-	const COLOR_SIZE: usize = 2;
-	const COLOR_RANGE: std::ops::Range<Color> = 0..Self::COLOR_SIZE;
+impl ColorUtils {
+	pub const WHITE: Color = 0;
+	pub const BLACK: Color = 1;
+	pub const BOTH: Color = 2;
 }
 
-impl Colors for Color {}
-impl ColorConsts for usize {}
-
-pub trait GetColor<T> {
-	fn get_color(value: T) -> Self;
-}
-
-impl GetColor<char> for Color {
-	fn get_color(value: char) -> Self {
+impl ColorUtils {
+	pub fn parse(value: char) -> Color {
 		match value {
 			'w' | 'W' => Self::WHITE,
 			'b' | 'B' => Self::BLACK,
 			_ => panic!("Invalid color: {}", value),
 		}
 	}
-}
 
-impl GetColor<bool> for Color {
-	fn get_color(value: bool) -> Self {
+	pub fn from_bool(value: bool) -> Color {
 		match value {
 			true => Self::WHITE,
 			false => Self::BLACK,
 		}
 	}
-}
 
-pub trait ColorString {
-	fn color_string(&self) -> String;
-}
-
-impl ColorString for Color {
-	fn color_string(&self) -> String {
-		String::from(match *self {
+	pub fn to_string(value: Color) -> String {
+		String::from(match value {
 			Self::WHITE => "w",
 			Self::BLACK => "b",
-			Self::BOTH => "Both",
-			_ => panic!("Invalid color: {}", self),
+			_ => panic!("Invalid color: {}", value),
 		})
 	}
 }
