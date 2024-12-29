@@ -1,6 +1,6 @@
 use castle_right::CastleRightString;
 use file_rank::Ranks;
-use square::SquareString;
+use square::SquareUtils;
 
 use super::*;
 use super::{
@@ -8,7 +8,6 @@ use super::{
 	color::{ColorConsts, ColorString},
 	file_rank::FileRankConsts,
 	piece::PieceString,
-	square::GetSquare,
 };
 use std::fmt;
 
@@ -42,7 +41,7 @@ impl Board {
 			board += &format!(" {rank} ");
 
 			for file in usize::FILE_RANK_RANGE {
-				let piece = match self.get_piece(Square::get_square((file, rank))) {
+				let piece = match self.get_piece(SquareUtils::from_location(file, rank)) {
 					Some((piece, color)) => piece.piece_string(color),
 					None => " ".to_string(),
 				};
@@ -63,7 +62,7 @@ impl Board {
 			let mut empty = 0;
 
 			for file in usize::FILE_RANK_RANGE {
-				let square = Square::get_square((file, rank));
+				let square = SquareUtils::from_location(file, rank);
 
 				match self.get_piece(square) {
 					Some((piece, color)) => {
@@ -91,7 +90,7 @@ impl Board {
 		let castle_rights = &self.castle_rights.castle_right_string();
 
 		let en_passant = match self.en_passant {
-			Some(square) => square.square_string(),
+			Some(square) => SquareUtils::to_string(square),
 			None => "-".to_string(),
 		};
 

@@ -1,14 +1,14 @@
 use super::{
-	castle_right::CastleRightConsts, color::ColorConsts, piece::PieceConsts, square::SquareConsts,
+	castle_right::CastleRightConsts, color::ColorConsts, piece::PieceConsts, square::SquareUtils,
 	CastleRight, Color, Piece, Square,
 };
 
 use rand::Rng;
 
-type PieceTable = [[[ZobristHash; Square::SQUARE_SIZE]; Piece::PIECE_SIZE]; Color::COLOR_SIZE];
+type PieceTable = [[[ZobristHash; SquareUtils::SIZE]; Piece::PIECE_SIZE]; Color::COLOR_SIZE];
 type ColorTable = [ZobristHash; Color::COLOR_SIZE];
 type CastleTable = [ZobristHash; CastleRight::CASTLE_RIGHT_SIZE];
-type EnPassantTable = [ZobristHash; Square::SQUARE_SIZE];
+type EnPassantTable = [ZobristHash; SquareUtils::SIZE];
 
 pub(crate) type ZobristHash = u64;
 
@@ -25,10 +25,10 @@ impl Default for HashTable {
 		let mut random = rand::thread_rng();
 
 		let mut hash_table = Self {
-			pieces: [[[0; Square::SQUARE_SIZE]; Piece::PIECE_SIZE]; Color::COLOR_SIZE],
+			pieces: [[[0; SquareUtils::SIZE]; Piece::PIECE_SIZE]; Color::COLOR_SIZE],
 			colors: [0; Color::COLOR_SIZE],
 			castles: [0; CastleRight::CASTLE_RIGHT_SIZE],
-			en_passant: [0; Square::SQUARE_SIZE],
+			en_passant: [0; SquareUtils::SIZE],
 		};
 
 		hash_table.pieces.iter_mut().for_each(|color| {

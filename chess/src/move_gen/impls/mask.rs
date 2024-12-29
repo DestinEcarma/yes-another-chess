@@ -2,14 +2,14 @@ use super::{AttackTable, BlockerTable, Direction, MoveGen};
 use crate::board::{
 	bitboard::{BitboardFiles, BitboardOccupied, BitboardRanks, BitboardSquares},
 	file_rank::{Files, Ranks},
-	square::SquareLocation,
+	square::SquareUtils,
 	Bitboard, File, Rank, Square,
 };
 
 impl MoveGen {
 	pub fn rook_mask(square: Square) -> Bitboard {
 		let edges = Self::edges(square);
-		let (file, rank) = square.location();
+		let (file, rank) = SquareUtils::location(square);
 
 		let mask = Bitboard::RANKS[rank] | Bitboard::FILES[file];
 
@@ -75,7 +75,7 @@ impl MoveGen {
 	}
 
 	fn edges(square: Square) -> Bitboard {
-		let (file, rank) = square.location();
+		let (file, rank) = SquareUtils::location(square);
 
 		let bitboard_file = Bitboard::FILES[file];
 		let bitboard_rank = Bitboard::RANKS[rank];

@@ -12,7 +12,7 @@ use crate::{
 		color::{ColorConsts, ColorString, Colors},
 		file_rank::Ranks,
 		piece::{PiecePromotions, Pieces},
-		square::{SquareConsts, Squares},
+		square::SquareUtils,
 		Bitboard, Board, CastleRight, Color, Piece, Rank, Square,
 	},
 	move_list::MoveList,
@@ -130,7 +130,7 @@ impl MoveGen {
 			_ => panic!("Invalid color: {}", color.color_string()),
 		};
 
-		let rotation_count = (usize::SQUARE_SIZE + direction) as u32;
+		let rotation_count = (SquareUtils::SIZE + direction) as u32;
 
 		let mut pieces = board.pieces[color][Piece::PAWN];
 
@@ -164,72 +164,74 @@ impl MoveGen {
 
 		if color == Color::WHITE && rights & CastleRight::WHITE > 0 {
 			if rights & CastleRight::WHITE_KING > 0 {
-				let blockers = Bitboard::SQUARES[Square::F1] | Bitboard::SQUARES[Square::G1];
+				let blockers =
+					Bitboard::SQUARES[SquareUtils::F1] | Bitboard::SQUARES[SquareUtils::G1];
 
 				if occupancy & blockers == 0
-					&& !self.square_attacked(board, opponent, Square::E1)
-					&& !self.square_attacked(board, opponent, Square::F1)
+					&& !self.square_attacked(board, opponent, SquareUtils::E1)
+					&& !self.square_attacked(board, opponent, SquareUtils::F1)
 				{
 					self.add_move(
 						board,
 						Piece::KING,
-						Square::E1,
-						Bitboard::SQUARES[Square::G1],
+						SquareUtils::E1,
+						Bitboard::SQUARES[SquareUtils::G1],
 						list,
 					);
 				}
 			}
 
 			if rights & CastleRight::WHITE_QUEEN > 0 {
-				let blockers = Bitboard::SQUARES[Square::D1]
-					| Bitboard::SQUARES[Square::C1]
-					| Bitboard::SQUARES[Square::B1];
+				let blockers = Bitboard::SQUARES[SquareUtils::D1]
+					| Bitboard::SQUARES[SquareUtils::C1]
+					| Bitboard::SQUARES[SquareUtils::B1];
 
 				if occupancy & blockers == 0
-					&& !self.square_attacked(board, opponent, Square::E1)
-					&& !self.square_attacked(board, opponent, Square::D1)
+					&& !self.square_attacked(board, opponent, SquareUtils::E1)
+					&& !self.square_attacked(board, opponent, SquareUtils::D1)
 				{
 					self.add_move(
 						board,
 						Piece::KING,
-						Square::E1,
-						Bitboard::SQUARES[Square::C1],
+						SquareUtils::E1,
+						Bitboard::SQUARES[SquareUtils::C1],
 						list,
 					);
 				}
 			}
 		} else if color == Color::BLACK && rights & CastleRight::BLACK > 0 {
 			if rights & CastleRight::BLACK_KING > 0 {
-				let blockers = Bitboard::SQUARES[Square::F8] | Bitboard::SQUARES[Square::G8];
+				let blockers =
+					Bitboard::SQUARES[SquareUtils::F8] | Bitboard::SQUARES[SquareUtils::G8];
 
 				if occupancy & blockers == 0
-					&& !self.square_attacked(board, opponent, Square::E8)
-					&& !self.square_attacked(board, opponent, Square::F8)
+					&& !self.square_attacked(board, opponent, SquareUtils::E8)
+					&& !self.square_attacked(board, opponent, SquareUtils::F8)
 				{
 					self.add_move(
 						board,
 						Piece::KING,
-						Square::E8,
-						Bitboard::SQUARES[Square::G8],
+						SquareUtils::E8,
+						Bitboard::SQUARES[SquareUtils::G8],
 						list,
 					);
 				}
 			}
 
 			if rights & CastleRight::BLACK_QUEEN > 0 {
-				let blockers = Bitboard::SQUARES[Square::D8]
-					| Bitboard::SQUARES[Square::C8]
-					| Bitboard::SQUARES[Square::B8];
+				let blockers = Bitboard::SQUARES[SquareUtils::D8]
+					| Bitboard::SQUARES[SquareUtils::C8]
+					| Bitboard::SQUARES[SquareUtils::B8];
 
 				if occupancy & blockers == 0
-					&& !self.square_attacked(board, opponent, Square::E8)
-					&& !self.square_attacked(board, opponent, Square::D8)
+					&& !self.square_attacked(board, opponent, SquareUtils::E8)
+					&& !self.square_attacked(board, opponent, SquareUtils::D8)
 				{
 					self.add_move(
 						board,
 						Piece::KING,
-						Square::E8,
-						Bitboard::SQUARES[Square::C8],
+						SquareUtils::E8,
+						Bitboard::SQUARES[SquareUtils::C8],
 						list,
 					);
 				}

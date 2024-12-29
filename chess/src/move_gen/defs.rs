@@ -1,8 +1,8 @@
 use super::Magic;
-use crate::board::{square::SquareConsts, Bitboard};
+use crate::board::{square::SquareUtils, Bitboard};
 
-pub type PieceMagics = [Magic; usize::SQUARE_SIZE];
-pub type PieceMoves = [Bitboard; usize::SQUARE_SIZE];
+pub type PieceMagics = [Magic; SquareUtils::SIZE];
+pub type PieceMoves = [Bitboard; SquareUtils::SIZE];
 pub type BlockerTable = Vec<Bitboard>;
 pub type AttackTable = Vec<Bitboard>;
 
