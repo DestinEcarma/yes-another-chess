@@ -2,6 +2,7 @@ mod history;
 mod move_list;
 mod perft;
 mod playmove;
+mod transposition;
 
 use move_list::MoveList;
 use std::{fmt, sync::Arc};
