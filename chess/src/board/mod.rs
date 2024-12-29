@@ -11,7 +11,7 @@ pub mod square;
 pub mod zobrist;
 
 use bitboard::BitboardUtils;
-use color::ColorConsts;
+use color::ColorUtils;
 use piece::Pieces;
 use std::sync::Arc;
 use zobrist::{HashTable, ZobristHash};
@@ -28,7 +28,7 @@ pub struct Board {
 	pub piece_list: PieceList,
 
 	pub occupancy: Bitboard,
-	pub occupancy_color: [Bitboard; usize::COLOR_SIZE],
+	pub occupancy_color: [Bitboard; ColorUtils::SIZE],
 
 	pub halfmove_clock: u8,
 	pub fullmove_number: u16,

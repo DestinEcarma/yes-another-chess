@@ -1,7 +1,7 @@
 // Marcel Vanthoor
 // https://github.com/mvanthoor/rustic
 
-use crate::board::{color::Colors, piece::PieceString, square::SquareUtils, Color, Piece, Square};
+use crate::board::{color::ColorUtils, piece::PieceString, square::SquareUtils, Piece, Square};
 use std::fmt::{self, Debug};
 
 #[derive(Copy, Clone, PartialEq)]
@@ -32,9 +32,9 @@ impl Debug for Move {
 			"{}{} {} {} {} {en_passant} {two_step} {castling}",
 			SquareUtils::to_string(from),
 			SquareUtils::to_string(to),
-			piece.piece_string(Color::BOTH),
-			captured.piece_string(Color::BOTH),
-			promoted.piece_string(Color::BOTH),
+			piece.piece_string(ColorUtils::BOTH),
+			captured.piece_string(ColorUtils::BOTH),
+			promoted.piece_string(ColorUtils::BOTH),
 		)
 	}
 }

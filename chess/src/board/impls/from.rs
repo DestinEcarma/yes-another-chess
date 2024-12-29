@@ -3,11 +3,8 @@ use castle_right::GetCastleRight;
 use file_rank::{FileUtils, RankUtils};
 use square::SquareUtils;
 
+use super::piece::{GetPiece, PieceConsts};
 use super::*;
-use super::{
-	color::{ColorConsts, Colors, GetColor},
-	piece::{GetPiece, PieceConsts},
-};
 
 impl From<&str> for Board {
 	fn from(value: &str) -> Self {
@@ -18,14 +15,14 @@ impl From<&str> for Board {
 impl From<(&str, Arc<HashTable>)> for Board {
 	fn from(value: (&str, Arc<HashTable>)) -> Self {
 		let mut board = Self {
-			pieces: [[BitboardUtils::EMPTY; usize::PIECE_SIZE]; usize::COLOR_SIZE],
-			color: Color::WHITE,
+			pieces: [[BitboardUtils::EMPTY; usize::PIECE_SIZE]; ColorUtils::SIZE],
+			color: ColorUtils::WHITE,
 			en_passant: None,
 			castle_rights: CastleRight::default(),
 
 			piece_list: [Piece::NONE; SquareUtils::SIZE],
 			occupancy: BitboardUtils::EMPTY,
-			occupancy_color: [BitboardUtils::EMPTY; usize::COLOR_SIZE],
+			occupancy_color: [BitboardUtils::EMPTY; ColorUtils::SIZE],
 
 			halfmove_clock: 0,
 			fullmove_number: 1,
@@ -60,8 +57,8 @@ impl Board {
 	fn init_hash(&mut self) {
 		self.hash = 0;
 
-		let bb_white = self.pieces[usize::WHITE];
-		let bb_black = self.pieces[usize::BLACK];
+		let bb_white = self.pieces[ColorUtils::WHITE];
+		let bb_black = self.pieces[ColorUtils::BLACK];
 
 		for (piece, (white, black)) in bb_white.iter().zip(bb_black.iter()).enumerate() {
 			let mut white_pieces = *white;
@@ -70,13 +67,13 @@ impl Board {
 			while white_pieces > 0 {
 				let square = BitboardUtils::pop_lsb(&mut white_pieces);
 
-				self.hash ^= self.hash_table.piece(piece, Color::WHITE, square);
+				self.hash ^= self.hash_table.piece(piece, ColorUtils::WHITE, square);
 			}
 
 			while black_pieces > 0 {
 				let square = BitboardUtils::pop_lsb(&mut black_pieces);
 
-				self.hash ^= self.hash_table.piece(piece, Color::BLACK, square);
+				self.hash ^= self.hash_table.piece(piece, ColorUtils::BLACK, square);
 			}
 		}
 
@@ -107,7 +104,7 @@ impl BoardBuilder {
 				_ => {
 					board.add_piece(
 						Piece::get_piece(ch),
-						Color::get_color(ch.is_uppercase()),
+						ColorUtils::from_bool(ch.is_uppercase()),
 						SquareUtils::from_location(file, rank),
 					);
 					file += 1;
@@ -118,7 +115,7 @@ impl BoardBuilder {
 
 	fn set_color(board: &mut Board, color: &str) {
 		if let Some(ch) = color.chars().next() {
-			board.color = Color::get_color(ch);
+			board.color = ColorUtils::parse(ch);
 		}
 	}
 

@@ -9,11 +9,11 @@ use crate::{
 	board::{
 		bitboard::BitboardUtils,
 		castle_right::CastleRights,
-		color::{ColorConsts, ColorString, Colors},
+		color::ColorUtils,
 		file_rank::RankUtils,
 		piece::{PiecePromotions, Pieces},
 		square::SquareUtils,
-		Bitboard, Board, CastleRight, Color, Piece, Square,
+		Bitboard, Board, CastleRight, Piece, Square,
 	},
 	move_list::MoveList,
 };
@@ -27,7 +27,7 @@ pub struct MoveGen {
 	rook_magics: PieceMagics,
 	bishop_magics: PieceMagics,
 	knight: PieceMoves,
-	pawns: [PieceMoves; usize::COLOR_SIZE],
+	pawns: [PieceMoves; ColorUtils::SIZE],
 }
 
 impl MoveGen {
@@ -119,15 +119,15 @@ impl MoveGen {
 		let empty = !board.occupancy;
 
 		let fourth = match color {
-			Color::WHITE => RankUtils::R4,
-			Color::BLACK => RankUtils::R5,
-			_ => panic!("Invalid color: {}", color.color_string()),
+			ColorUtils::WHITE => RankUtils::R4,
+			ColorUtils::BLACK => RankUtils::R5,
+			_ => panic!("Invalid color: {color}"),
 		};
 
 		let direction = match color {
-			Color::WHITE => Direction::North,
-			Color::BLACK => Direction::South,
-			_ => panic!("Invalid color: {}", color.color_string()),
+			ColorUtils::WHITE => Direction::North,
+			ColorUtils::BLACK => Direction::South,
+			_ => panic!("Invalid color: {color}"),
 		};
 
 		let rotation_count = (SquareUtils::SIZE + direction) as u32;
@@ -163,7 +163,7 @@ impl MoveGen {
 
 		let rights = board.castle_rights;
 
-		if color == Color::WHITE && rights & CastleRight::WHITE > 0 {
+		if color == ColorUtils::WHITE && rights & CastleRight::WHITE > 0 {
 			if rights & CastleRight::WHITE_KING > 0 {
 				let blockers = BitboardUtils::SQUARES[SquareUtils::F1]
 					| BitboardUtils::SQUARES[SquareUtils::G1];
@@ -200,7 +200,7 @@ impl MoveGen {
 					);
 				}
 			}
-		} else if color == Color::BLACK && rights & CastleRight::BLACK > 0 {
+		} else if color == ColorUtils::BLACK && rights & CastleRight::BLACK > 0 {
 			if rights & CastleRight::BLACK_KING > 0 {
 				let blockers = BitboardUtils::SQUARES[SquareUtils::F8]
 					| BitboardUtils::SQUARES[SquareUtils::G8];
@@ -256,9 +256,9 @@ impl MoveGen {
 		let is_pawn = Piece::PAWN == piece;
 
 		let promotion_rank = match color {
-			Color::WHITE => RankUtils::R8,
-			Color::BLACK => RankUtils::R1,
-			_ => panic!("Invalid color: {}", color.color_string()),
+			ColorUtils::WHITE => RankUtils::R8,
+			ColorUtils::BLACK => RankUtils::R1,
+			_ => panic!("Invalid color: {color}"),
 		};
 
 		while moves > 0 {

@@ -1,4 +1,4 @@
-use super::{color::Colors, Color};
+use super::{color::ColorUtils, Color};
 
 pub type Piece = usize;
 
@@ -61,9 +61,9 @@ impl PieceString for Piece {
 		};
 
 		String::from(match color {
-			Color::WHITE => ch,
-			Color::BLACK => ch.to_ascii_lowercase(),
-			Color::BOTH => {
+			ColorUtils::WHITE => ch,
+			ColorUtils::BLACK => ch.to_ascii_lowercase(),
+			ColorUtils::BOTH => {
 				let piece = match *self {
 					Piece::PAWN => "Pawn",
 					Piece::KNIGHT => "Knight",

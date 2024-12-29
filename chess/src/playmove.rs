@@ -2,10 +2,10 @@ use crate::{
 	board::{
 		bitboard::BitboardUtils,
 		castle_right::{CastleRightSquares, CastleRights},
-		color::Colors,
+		color::ColorUtils,
 		piece::Pieces,
 		square::SquareUtils,
-		CastleRight, Color, Piece,
+		CastleRight, Piece,
 	},
 	history::OldState,
 	move_gen::Move,
@@ -97,7 +97,7 @@ impl Chess {
 
 		board.switch_color();
 
-		if color == Color::BLACK {
+		if color == ColorUtils::BLACK {
 			board.fullmove_number += 1;
 		}
 
