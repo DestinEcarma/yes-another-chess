@@ -15,7 +15,8 @@ fn main() {
 			depth,
 			fen,
 			threads,
-		}) => args::perft(depth, fen, threads),
+			hash,
+		}) => args::perft(depth, fen, threads, hash),
 		#[cfg(debug_assertions)]
 		Some(Command::Magic { piece }) => args::magic(piece),
 	}
