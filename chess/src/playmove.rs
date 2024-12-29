@@ -1,11 +1,7 @@
 use crate::{
 	board::{
-		bitboard::BitboardUtils,
-		castle_right::{CastleRightSquares, CastleRights},
-		color::ColorUtils,
-		piece::Pieces,
-		square::SquareUtils,
-		CastleRight, Piece,
+		bitboard::BitboardUtils, castle_right::CastleRightUtils, color::ColorUtils, piece::Pieces,
+		square::SquareUtils, Piece,
 	},
 	history::OldState,
 	move_gen::Move,
@@ -23,7 +19,7 @@ impl Chess {
 
 		let color = board.color;
 		let opponent = color ^ 1;
-		let has_caslte_rights = board.castle_rights != CastleRight::NONE;
+		let has_caslte_rights = board.castle_rights != CastleRightUtils::NONE;
 
 		let piece = m.piece();
 		let from = m.from();
@@ -40,7 +36,7 @@ impl Chess {
 			board.remove_piece(captured, opponent, to);
 
 			if captured == Piece::ROOK && has_caslte_rights {
-				board.update_castle_rights(board.castle_rights & !CastleRight::SQUARES[to]);
+				board.update_castle_rights(board.castle_rights & !CastleRightUtils::SQUARES[to]);
 			}
 		}
 
@@ -69,7 +65,7 @@ impl Chess {
 			board.add_piece(piece, color, to);
 
 			if (piece == Piece::KING || piece == Piece::ROOK) && has_caslte_rights {
-				board.update_castle_rights(board.castle_rights & !CastleRight::SQUARES[from]);
+				board.update_castle_rights(board.castle_rights & !CastleRightUtils::SQUARES[from]);
 			}
 
 			if m.castling() {

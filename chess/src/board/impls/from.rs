@@ -1,5 +1,5 @@
 use bitboard::BitboardUtils;
-use castle_right::GetCastleRight;
+use castle_right::CastleRightUtils;
 use file_rank::{FileUtils, RankUtils};
 use square::SquareUtils;
 
@@ -125,7 +125,7 @@ impl BoardBuilder {
 		}
 
 		for ch in castling_rights.chars() {
-			board.castle_rights |= CastleRight::get_castle_right(ch);
+			board.castle_rights |= CastleRightUtils::parse(ch);
 		}
 	}
 
