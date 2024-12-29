@@ -1,7 +1,7 @@
 use crate::{
 	board::{
 		bitboard::BitboardLSB,
-		castle_right::CastleRightSquares,
+		castle_right::{CastleRightSquares, CastleRights},
 		color::Colors,
 		piece::Pieces,
 		square::{SquareString, Squares},
@@ -19,11 +19,11 @@ impl Chess {
 
 		self.history.push(OldState::new(board, m));
 
-		board.en_passant = None;
 		board.halfmove_clock += 1;
 
 		let color = board.color;
 		let opponent = color ^ 1;
+		let has_caslte_rights = board.castle_rights != CastleRight::NONE;
 
 		let piece = m.piece();
 		let from = m.from();
@@ -31,12 +31,16 @@ impl Chess {
 		let captured = m.captured();
 		let promoted = m.promoted();
 
+		if board.en_passant.is_some() {
+			board.clear_en_passant();
+		}
+
 		if captured != Piece::NONE {
 			board.halfmove_clock = 0;
 			board.remove_piece(captured, opponent, to);
 
-			if captured == Piece::ROOK {
-				board.castle_rights &= !CastleRight::SQUARES[to];
+			if captured == Piece::ROOK && has_caslte_rights {
+				board.update_castle_rights(board.castle_rights & !CastleRight::SQUARES[to]);
 			}
 		}
 
@@ -58,14 +62,14 @@ impl Chess {
 			}
 
 			if m.two_step() {
-				board.en_passant = Some(to ^ 8);
+				board.set_en_passant(to ^ 8);
 			}
 		} else {
 			board.remove_piece(piece, color, from);
 			board.add_piece(piece, color, to);
 
-			if piece == Piece::KING || piece == Piece::ROOK {
-				board.castle_rights &= !CastleRight::SQUARES[from];
+			if (piece == Piece::KING || piece == Piece::ROOK) && has_caslte_rights {
+				board.update_castle_rights(board.castle_rights & !CastleRight::SQUARES[from]);
 			}
 
 			if m.castling() {
@@ -91,7 +95,7 @@ impl Chess {
 			}
 		}
 
-		board.color = opponent;
+		board.switch_color();
 
 		if color == Color::BLACK {
 			board.fullmove_number += 1;
@@ -168,6 +172,8 @@ impl Chess {
 			if m.en_passant() {
 				board.add_piece(Piece::PAWN, color ^ 1, to ^ 8);
 			}
+
+			board.hash = state.hash;
 		}
 	}
 }

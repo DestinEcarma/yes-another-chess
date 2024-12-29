@@ -1,5 +1,5 @@
 use crate::{
-	board::{Board, CastleRight, Color, Square},
+	board::{zobrist::ZobristHash, Board, CastleRight, Color, Square},
 	move_gen::Move,
 };
 
@@ -13,12 +13,14 @@ pub struct OldState {
 	pub halfmove_clock: u8,
 	pub fullmove_number: u16,
 	pub move_made: Move,
+	pub hash: ZobristHash,
 }
 
 impl OldState {
 	#[inline(always)]
 	pub fn new(board: &Board, move_made: Move) -> Self {
 		Self {
+			hash: board.hash,
 			color: board.color,
 			en_passant: board.en_passant,
 			castle_rights: board.castle_rights,
