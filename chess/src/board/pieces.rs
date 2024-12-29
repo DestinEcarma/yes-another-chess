@@ -1,9 +1,6 @@
-use crate::board::file_rank::RankUtils;
+use crate::board::{bitboard::BitboardUtils, file_rank::RankUtils};
 
-use super::{
-	bitboard::BitboardString, color::ColorConsts, piece::PieceConsts, square::SquareUtils,
-	Bitboard, Color, Piece,
-};
+use super::{color::ColorConsts, piece::PieceConsts, square::SquareUtils, Bitboard, Color, Piece};
 
 pub type PieceList = [Piece; SquareUtils::SIZE];
 pub type BitboardPieces = [[Bitboard; usize::PIECE_SIZE]; usize::COLOR_SIZE];
@@ -15,7 +12,9 @@ pub trait PrintBitboards {
 impl PrintBitboards for BitboardPieces {
 	fn print_bitboards(&self, color: Color) {
 		if let Some(bitboards) = self.get(color) {
-			let bitboards = bitboards.iter().map(|bitboard| bitboard.bitboard_string());
+			let bitboards = bitboards
+				.iter()
+				.map(|bitboard| BitboardUtils::to_string(*bitboard));
 
 			let lines = bitboards
 				.map(|s| s.lines().map(|s| s.to_string()).collect::<Vec<String>>())

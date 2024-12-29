@@ -6,25 +6,25 @@ use super::{
 
 pub type Bitboard = u64;
 
-pub trait BitboardFiles {
+pub struct BitboardUtils;
+
+impl BitboardUtils {
+	pub const EMPTY: Bitboard = 0;
+
 	#[rustfmt::skip]
-	const FILES: [Bitboard; FileUtils::SIZE] = [
+	pub const FILES: [Bitboard; FileUtils::SIZE] = [
 		0x0101010101010101, 0x0202020202020202, 0x0404040404040404, 0x0808080808080808,
 		0x1010101010101010, 0x2020202020202020, 0x4040404040404040, 0x8080808080808080,
 	];
-}
 
-pub trait BitboardRanks {
-	#[rustfmt::skip]
-	const RANKS: [Bitboard; RankUtils::SIZE] = [
+    #[rustfmt::skip]
+	pub const RANKS: [Bitboard; RankUtils::SIZE] = [
 		0x00000000000000FF, 0x000000000000FF00, 0x0000000000FF0000, 0x00000000FF000000,
 		0x000000FF00000000, 0x0000FF0000000000, 0x00FF000000000000, 0xFF00000000000000,
 	];
-}
 
-pub trait BitboardSquares {
-	#[rustfmt::skip]
-	const SQUARES: [Bitboard; SquareUtils::SIZE] = [
+    #[rustfmt::skip]
+	pub const SQUARES: [Bitboard; SquareUtils::SIZE] = [
 		0x0000000000000001, 0x0000000000000002, 0x0000000000000004, 0x0000000000000008,
 		0x0000000000000010, 0x0000000000000020, 0x0000000000000040, 0x0000000000000080,
 		0x0000000000000100, 0x0000000000000200, 0x0000000000000400, 0x0000000000000800,
@@ -44,53 +44,32 @@ pub trait BitboardSquares {
 	];
 }
 
-impl BitboardFiles for Bitboard {}
-impl BitboardRanks for Bitboard {}
-impl BitboardSquares for Bitboard {}
-
-pub trait BitboardLSB {
-	fn pop_lsb(&mut self) -> Square;
-	fn lsb(&self) -> Square;
-}
-
-impl BitboardLSB for Bitboard {
+impl BitboardUtils {
 	#[inline(always)]
-	fn pop_lsb(&mut self) -> Square {
-		let lsb = self.lsb();
-		*self &= *self - 1;
+	pub fn pop_lsb(bitboard: &mut Bitboard) -> Square {
+		let lsb = bitboard.trailing_zeros() as Square;
+		*bitboard &= *bitboard - 1;
 		lsb
 	}
 
 	#[inline(always)]
-	fn lsb(&self) -> Square {
-		self.trailing_zeros() as Square
+	pub fn lsb(bitboard: Bitboard) -> Square {
+		bitboard.trailing_zeros() as Square
 	}
-}
 
-pub trait BitboardOccupied<T: std::ops::BitAnd> {
-	fn occupied(&self, square: T) -> bool;
-}
-
-impl BitboardOccupied<Square> for Bitboard {
 	#[inline(always)]
-	fn occupied(&self, square: Square) -> bool {
-		self & Self::SQUARES[square] > 0
+	pub fn occupied(bitboard: Bitboard, square: Square) -> bool {
+		bitboard & Self::SQUARES[square] > 0
 	}
-}
 
-pub trait BitboardString {
-	fn bitboard_string(&self) -> String;
-}
-
-impl BitboardString for Bitboard {
-	fn bitboard_string(&self) -> String {
+	pub fn to_string(bitboard: Bitboard) -> String {
 		let mut string = String::new();
 
 		for rank in RankUtils::RANGE.rev() {
 			for file in FileUtils::RANGE {
 				let square = SquareUtils::from_location(file, rank);
 
-				string.push_str(match self.occupied(square) {
+				string.push_str(match Self::occupied(bitboard, square) {
 					true => "1 ",
 					false => "0 ",
 				});
