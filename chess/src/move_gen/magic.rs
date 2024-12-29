@@ -47,7 +47,7 @@ pub mod gen {
 	use std::time::Instant;
 
 	use super::super::{Magic, MoveGen, BISHOP_TABLE_SIZE, ROOK_TABLE_SIZE};
-	use crate::board::{piece::Pieces, square::SquareUtils, Bitboard, Piece};
+	use crate::board::{bitboard::BitboardUtils, piece::Pieces, square::SquareUtils, Piece};
 	use rand::Rng;
 
 	impl Magic {
@@ -61,8 +61,8 @@ pub mod gen {
 			};
 
 			let mut table = match is_rook {
-				true => vec![Bitboard::default(); ROOK_TABLE_SIZE],
-				false => vec![Bitboard::default(); BISHOP_TABLE_SIZE],
+				true => vec![BitboardUtils::EMPTY; ROOK_TABLE_SIZE],
+				false => vec![BitboardUtils::EMPTY; BISHOP_TABLE_SIZE],
 			};
 
 			let mut random = rand::thread_rng();
@@ -113,7 +113,7 @@ pub mod gen {
 							table[index] = attacks[next];
 						} else {
 							for wipe_index in offset..=end {
-								table[wipe_index as usize] = Bitboard::default();
+								table[wipe_index as usize] = BitboardUtils::EMPTY;
 							}
 
 							found = false;

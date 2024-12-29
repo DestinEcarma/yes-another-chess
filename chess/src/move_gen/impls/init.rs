@@ -1,23 +1,23 @@
 use super::{Magic, MoveGen, BISHOP_TABLE_SIZE, ROOK_TABLE_SIZE};
 use crate::board::{
-	bitboard::{BitboardFiles, BitboardRanks, BitboardSquares},
+	bitboard::BitboardUtils,
 	color::{ColorConsts, Colors},
 	file_rank::{FileUtils, RankUtils},
 	piece::{PieceString, Pieces},
 	square::SquareUtils,
-	Bitboard, Color, Piece,
+	Color, Piece,
 };
 
 impl Default for MoveGen {
 	fn default() -> Self {
 		let mut move_gen = Self {
-			king: [Bitboard::default(); SquareUtils::SIZE],
-			rooks: vec![Bitboard::default(); ROOK_TABLE_SIZE],
-			bishops: vec![Bitboard::default(); BISHOP_TABLE_SIZE],
+			king: [BitboardUtils::EMPTY; SquareUtils::SIZE],
+			rooks: vec![BitboardUtils::EMPTY; ROOK_TABLE_SIZE],
+			bishops: vec![BitboardUtils::EMPTY; BISHOP_TABLE_SIZE],
 			rook_magics: [Magic::default(); SquareUtils::SIZE],
 			bishop_magics: [Magic::default(); SquareUtils::SIZE],
-			knight: [Bitboard::default(); SquareUtils::SIZE],
-			pawns: [[Bitboard::default(); SquareUtils::SIZE]; usize::COLOR_SIZE],
+			knight: [BitboardUtils::EMPTY; SquareUtils::SIZE],
+			pawns: [[BitboardUtils::EMPTY; SquareUtils::SIZE]; usize::COLOR_SIZE],
 		};
 
 		move_gen.init_king();
@@ -33,68 +33,75 @@ impl Default for MoveGen {
 impl MoveGen {
 	fn init_king(&mut self) {
 		for square in SquareUtils::RANGE {
-			let bitboard = Bitboard::SQUARES[square];
+			let bitboard = BitboardUtils::SQUARES[square];
 
-			self.king[square] |=
-				(bitboard & !Bitboard::FILES[FileUtils::A] & !Bitboard::RANKS[RankUtils::R8]) << 7
-					| (bitboard & !Bitboard::RANKS[RankUtils::R8]) << 8
-					| (bitboard & !Bitboard::RANKS[RankUtils::R8] & !Bitboard::FILES[FileUtils::H])
-						<< 9 | (bitboard & !Bitboard::FILES[FileUtils::H]) << 1
-					| (bitboard & !Bitboard::RANKS[RankUtils::R1] & !Bitboard::FILES[FileUtils::H])
-						>> 7 | (bitboard & !Bitboard::RANKS[RankUtils::R1]) >> 8
-					| (bitboard & !Bitboard::RANKS[RankUtils::R1] & !Bitboard::FILES[FileUtils::A])
-						>> 9 | (bitboard & !Bitboard::FILES[FileUtils::A]) >> 1;
+			self.king[square] |= (bitboard
+				& !BitboardUtils::FILES[FileUtils::A]
+				& !BitboardUtils::RANKS[RankUtils::R8])
+				<< 7 | (bitboard & !BitboardUtils::RANKS[RankUtils::R8]) << 8
+				| (bitboard
+					& !BitboardUtils::RANKS[RankUtils::R8]
+					& !BitboardUtils::FILES[FileUtils::H])
+					<< 9 | (bitboard & !BitboardUtils::FILES[FileUtils::H]) << 1
+				| (bitboard
+					& !BitboardUtils::RANKS[RankUtils::R1]
+					& !BitboardUtils::FILES[FileUtils::H])
+					>> 7 | (bitboard & !BitboardUtils::RANKS[RankUtils::R1]) >> 8
+				| (bitboard
+					& !BitboardUtils::RANKS[RankUtils::R1]
+					& !BitboardUtils::FILES[FileUtils::A])
+					>> 9 | (bitboard & !BitboardUtils::FILES[FileUtils::A]) >> 1;
 		}
 	}
 
 	fn init_knight(&mut self) {
 		for square in SquareUtils::RANGE {
-			let bitboard = Bitboard::SQUARES[square];
+			let bitboard = BitboardUtils::SQUARES[square];
 
 			self.knight[square] |= (bitboard
-				& !Bitboard::RANKS[RankUtils::R8]
-				& !Bitboard::RANKS[RankUtils::R7]
-				& !Bitboard::FILES[FileUtils::A])
+				& !BitboardUtils::RANKS[RankUtils::R8]
+				& !BitboardUtils::RANKS[RankUtils::R7]
+				& !BitboardUtils::FILES[FileUtils::A])
 				<< 15 | (bitboard
-				& !Bitboard::RANKS[RankUtils::R8]
-				& !Bitboard::RANKS[RankUtils::R7]
-				& !Bitboard::FILES[FileUtils::H])
+				& !BitboardUtils::RANKS[RankUtils::R8]
+				& !BitboardUtils::RANKS[RankUtils::R7]
+				& !BitboardUtils::FILES[FileUtils::H])
 				<< 17 | (bitboard
-				& !Bitboard::RANKS[RankUtils::R8]
-				& !Bitboard::FILES[FileUtils::A]
-				& !Bitboard::FILES[FileUtils::B])
+				& !BitboardUtils::RANKS[RankUtils::R8]
+				& !BitboardUtils::FILES[FileUtils::A]
+				& !BitboardUtils::FILES[FileUtils::B])
 				<< 6 | (bitboard
-				& !Bitboard::RANKS[RankUtils::R8]
-				& !Bitboard::FILES[FileUtils::G]
-				& !Bitboard::FILES[FileUtils::H])
+				& !BitboardUtils::RANKS[RankUtils::R8]
+				& !BitboardUtils::FILES[FileUtils::G]
+				& !BitboardUtils::FILES[FileUtils::H])
 				<< 10 | (bitboard
-				& !Bitboard::RANKS[RankUtils::R1]
-				& !Bitboard::RANKS[RankUtils::R2]
-				& !Bitboard::FILES[FileUtils::A])
+				& !BitboardUtils::RANKS[RankUtils::R1]
+				& !BitboardUtils::RANKS[RankUtils::R2]
+				& !BitboardUtils::FILES[FileUtils::A])
 				>> 17 | (bitboard
-				& !Bitboard::RANKS[RankUtils::R1]
-				& !Bitboard::RANKS[RankUtils::R2]
-				& !Bitboard::FILES[FileUtils::H])
+				& !BitboardUtils::RANKS[RankUtils::R1]
+				& !BitboardUtils::RANKS[RankUtils::R2]
+				& !BitboardUtils::FILES[FileUtils::H])
 				>> 15 | (bitboard
-				& !Bitboard::RANKS[RankUtils::R1]
-				& !Bitboard::FILES[FileUtils::A]
-				& !Bitboard::FILES[FileUtils::B])
+				& !BitboardUtils::RANKS[RankUtils::R1]
+				& !BitboardUtils::FILES[FileUtils::A]
+				& !BitboardUtils::FILES[FileUtils::B])
 				>> 10 | (bitboard
-				& !Bitboard::RANKS[RankUtils::R1]
-				& !Bitboard::FILES[FileUtils::G]
-				& !Bitboard::FILES[FileUtils::H])
+				& !BitboardUtils::RANKS[RankUtils::R1]
+				& !BitboardUtils::FILES[FileUtils::G]
+				& !BitboardUtils::FILES[FileUtils::H])
 				>> 6;
 		}
 	}
 
 	fn init_pawn(&mut self) {
 		for square in SquareUtils::RANGE {
-			let bitboard = Bitboard::SQUARES[square];
+			let bitboard = BitboardUtils::SQUARES[square];
 
-			let white = (bitboard & !Bitboard::FILES[FileUtils::A]) << 7
-				| (bitboard & !Bitboard::FILES[FileUtils::H]) << 9;
-			let black = (bitboard & !Bitboard::FILES[FileUtils::H]) >> 7
-				| (bitboard & !Bitboard::FILES[FileUtils::A]) >> 9;
+			let white = (bitboard & !BitboardUtils::FILES[FileUtils::A]) << 7
+				| (bitboard & !BitboardUtils::FILES[FileUtils::H]) << 9;
+			let black = (bitboard & !BitboardUtils::FILES[FileUtils::H]) >> 7
+				| (bitboard & !BitboardUtils::FILES[FileUtils::A]) >> 9;
 
 			self.pawns[Color::WHITE][square] = white;
 			self.pawns[Color::BLACK][square] = black;

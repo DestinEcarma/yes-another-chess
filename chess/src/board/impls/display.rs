@@ -4,7 +4,6 @@ use square::SquareUtils;
 
 use super::*;
 use super::{
-	bitboard::BitboardOccupied,
 	color::{ColorConsts, ColorString},
 	piece::PieceString,
 };
@@ -24,7 +23,7 @@ impl Board {
 			None
 		} else {
 			for color in Color::COLOR_RANGE {
-				if self.pieces[color][piece].occupied(square) {
+				if BitboardUtils::occupied(self.pieces[color][piece], square) {
 					return Some((piece, color));
 				}
 			}

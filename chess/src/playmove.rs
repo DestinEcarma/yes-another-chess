@@ -1,6 +1,6 @@
 use crate::{
 	board::{
-		bitboard::BitboardLSB,
+		bitboard::BitboardUtils,
 		castle_right::{CastleRightSquares, CastleRights},
 		color::Colors,
 		piece::Pieces,
@@ -101,10 +101,11 @@ impl Chess {
 			board.fullmove_number += 1;
 		}
 
-		let legal =
-			!self
-				.move_gen
-				.square_attacked(board, opponent, board.pieces[color][Piece::KING].lsb());
+		let legal = !self.move_gen.square_attacked(
+			board,
+			opponent,
+			BitboardUtils::lsb(board.pieces[color][Piece::KING]),
+		);
 
 		if !legal {
 			self.undo_move();

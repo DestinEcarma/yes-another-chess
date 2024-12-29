@@ -1,4 +1,4 @@
-use bitboard::BitboardLSB;
+use bitboard::BitboardUtils;
 use castle_right::GetCastleRight;
 use file_rank::{FileUtils, RankUtils};
 use square::SquareUtils;
@@ -18,14 +18,14 @@ impl From<&str> for Board {
 impl From<(&str, Arc<HashTable>)> for Board {
 	fn from(value: (&str, Arc<HashTable>)) -> Self {
 		let mut board = Self {
-			pieces: [[Bitboard::default(); usize::PIECE_SIZE]; usize::COLOR_SIZE],
+			pieces: [[BitboardUtils::EMPTY; usize::PIECE_SIZE]; usize::COLOR_SIZE],
 			color: Color::WHITE,
 			en_passant: None,
 			castle_rights: CastleRight::default(),
 
 			piece_list: [Piece::NONE; SquareUtils::SIZE],
-			occupancy: Bitboard::default(),
-			occupancy_color: [Bitboard::default(); usize::COLOR_SIZE],
+			occupancy: BitboardUtils::EMPTY,
+			occupancy_color: [BitboardUtils::EMPTY; usize::COLOR_SIZE],
 
 			halfmove_clock: 0,
 			fullmove_number: 1,
@@ -68,13 +68,13 @@ impl Board {
 			let mut black_pieces = *black;
 
 			while white_pieces > 0 {
-				let square = white_pieces.pop_lsb();
+				let square = BitboardUtils::pop_lsb(&mut white_pieces);
 
 				self.hash ^= self.hash_table.piece(piece, Color::WHITE, square);
 			}
 
 			while black_pieces > 0 {
-				let square = black_pieces.pop_lsb();
+				let square = BitboardUtils::pop_lsb(&mut black_pieces);
 
 				self.hash ^= self.hash_table.piece(piece, Color::BLACK, square);
 			}
@@ -82,10 +82,7 @@ impl Board {
 
 		self.hash ^= self.hash_table.color(self.color);
 		self.hash ^= self.hash_table.castle(self.castle_rights);
-
-		if let Some(en_passant) = self.en_passant {
-			self.hash ^= self.hash_table.en_passant(en_passant);
-		}
+		self.hash ^= self.hash_table.en_passant(self.en_passant);
 	}
 }
 
