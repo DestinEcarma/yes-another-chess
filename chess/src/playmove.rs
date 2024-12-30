@@ -103,6 +103,9 @@ impl Chess {
 			BitboardUtils::lsb(board.pieces[color][PieceUtils::KING]),
 		);
 
+		#[cfg(debug_assertions)]
+		debug_assert!(debug::check_incrementals(board));
+
 		if !legal {
 			self.undo_move();
 		}
@@ -172,5 +175,22 @@ impl Chess {
 
 			board.hash = state.hash;
 		}
+	}
+}
+
+#[cfg(debug_assertions)]
+mod debug {
+	use crate::board;
+
+	pub fn check_incrementals(board: &board::Board) -> bool {
+		let from_scratch_key = board.init_hash();
+		let mut result = true;
+
+		if result && from_scratch_key != board.hash {
+			println!("Check Incrementals: Error in Zobrist key.");
+			result = false;
+		};
+
+		result
 	}
 }

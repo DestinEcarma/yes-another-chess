@@ -1,10 +1,10 @@
+use super::*;
+
 use bitboard::BitboardUtils;
 use castle_right::CastleRightUtils;
 use file_rank::{FileUtils, RankUtils};
 use piece::PieceUtils;
 use square::SquareUtils;
-
-use super::*;
 
 impl From<&str> for Board {
 	fn from(value: &str) -> Self {
@@ -47,15 +47,15 @@ impl From<(&str, Arc<HashTable>)> for Board {
 			board.fullmove_number = num.parse().unwrap_or(1);
 		}
 
-		board.init_hash();
+		board.hash = board.init_hash();
 
 		board
 	}
 }
 
 impl Board {
-	fn init_hash(&mut self) {
-		self.hash = 0;
+	pub(crate) fn init_hash(&self) -> ZobristHash {
+		let mut hash = ZobristHash::default();
 
 		let bb_white = self.pieces[ColorUtils::WHITE];
 		let bb_black = self.pieces[ColorUtils::BLACK];
@@ -67,19 +67,21 @@ impl Board {
 			while white_pieces > 0 {
 				let square = BitboardUtils::pop_lsb(&mut white_pieces);
 
-				self.hash ^= self.hash_table.piece(piece, ColorUtils::WHITE, square);
+				hash ^= self.hash_table.piece(piece, ColorUtils::WHITE, square);
 			}
 
 			while black_pieces > 0 {
 				let square = BitboardUtils::pop_lsb(&mut black_pieces);
 
-				self.hash ^= self.hash_table.piece(piece, ColorUtils::BLACK, square);
+				hash ^= self.hash_table.piece(piece, ColorUtils::BLACK, square);
 			}
 		}
 
-		self.hash ^= self.hash_table.color(self.color);
-		self.hash ^= self.hash_table.castle(self.castle_rights);
-		self.hash ^= self.hash_table.en_passant(self.en_passant);
+		hash ^= self.hash_table.color(self.color);
+		hash ^= self.hash_table.castle(self.castle_rights);
+		hash ^= self.hash_table.en_passant(self.en_passant);
+
+		hash
 	}
 }
 
