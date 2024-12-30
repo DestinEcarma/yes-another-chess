@@ -3,7 +3,10 @@ use crate::{
 	Chess,
 };
 
-use std::{sync::Arc, thread};
+use std::{
+	sync::{Arc, RwLock},
+	thread,
+};
 
 impl Chess {
 	#[inline(always)]
@@ -32,10 +35,10 @@ impl Chess {
 
 		let tt_enabled = bytes.is_some();
 
-		let tt = Arc::new(match bytes {
+		let tt = Arc::new(RwLock::new(match bytes {
 			Some(mb) => TranspositionTable::new(mb / num_threads),
 			None => TranspositionTable::default(),
-		});
+		}));
 
 		let start = std::time::Instant::now();
 
@@ -80,7 +83,7 @@ impl Chess {
 	pub fn perft_driver(
 		&mut self,
 		depth: u8,
-		tt: &Arc<TranspositionTable<PerftData>>,
+		tt: &Arc<RwLock<TranspositionTable<PerftData>>>,
 		tt_enabled: bool,
 	) -> usize {
 		if depth == 0 {
@@ -88,7 +91,7 @@ impl Chess {
 		}
 
 		if tt_enabled {
-			if let Some(data) = tt.get(&self.board.hash, &tt.guard()) {
+			if let Some(data) = tt.read().unwrap().get(self.board.hash) {
 				if data.depth() == depth {
 					return data.nodes();
 				}
@@ -99,7 +102,7 @@ impl Chess {
 
 		let list = self.generate_moves();
 
-		for m in &list {
+		for m in list.iter() {
 			if self.play_move(*m) {
 				nodes += self.perft_driver(depth - 1, tt, tt_enabled);
 				self.undo_move();
@@ -107,7 +110,9 @@ impl Chess {
 		}
 
 		if tt_enabled {
-			tt.insert(self.board.hash, PerftData::new(depth, nodes));
+			tt.write()
+				.unwrap()
+				.insert(self.board.hash, PerftData::new(depth, nodes));
 		}
 
 		nodes
