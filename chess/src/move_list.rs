@@ -22,14 +22,14 @@ impl Default for MoveList {
 	}
 }
 
-impl<'a> IntoIterator for &'a MoveList {
-	type Item = &'a Move;
-	type IntoIter = std::slice::Iter<'a, Move>;
-
-	fn into_iter(self) -> Self::IntoIter {
-		self.list[..self.count].iter()
-	}
-}
+//impl<'a> IntoIterator for &'a MoveList {
+//	type Item = &'a Move;
+//	type IntoIter = std::slice::Iter<'a, Move>;
+//
+//	fn into_iter(self) -> Self::IntoIter {
+//		self.list[..self.count].iter()
+//	}
+//}
 
 impl MoveList {
 	#[inline(always)]
@@ -49,5 +49,9 @@ impl MoveList {
 			.chunks(chunk_size)
 			.map(|chunk| chunk.to_vec())
 			.collect()
+	}
+
+	pub fn iter(&self) -> std::slice::Iter<Move> {
+		self.list[..self.count].iter()
 	}
 }
