@@ -1,5 +1,5 @@
 use chess::{
-	board::{color::ColorUtils, pieces::PrintBitboards, Board, Color},
+	board::{color::ColorUtils, pieces::BitboardPiecesUtils, Board, Color},
 	move_gen::MoveGen,
 	Chess,
 };
@@ -64,9 +64,9 @@ pub fn display(fen: Option<String>, bitboards: bool) {
 		false => println!("{board}"),
 		true => {
 			println!("White Pieces:");
-			board.pieces.print_bitboards(ColorUtils::WHITE);
+			BitboardPiecesUtils::to_string(&board.pieces, ColorUtils::WHITE);
 			println!("Black Pieces:");
-			board.pieces.print_bitboards(ColorUtils::BLACK);
+			BitboardPiecesUtils::to_string(&board.pieces, ColorUtils::BLACK);
 		}
 	}
 }
