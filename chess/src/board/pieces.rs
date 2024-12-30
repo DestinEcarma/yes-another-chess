@@ -5,13 +5,11 @@ use super::{color::ColorUtils, piece::PieceUtils, square::SquareUtils, Bitboard,
 pub type PieceList = [Piece; SquareUtils::SIZE];
 pub type BitboardPieces = [[Bitboard; PieceUtils::SIZE]; ColorUtils::SIZE];
 
-pub trait PrintBitboards {
-	fn print_bitboards(&self, color: Color);
-}
+pub struct BitboardPiecesUtils;
 
-impl PrintBitboards for BitboardPieces {
-	fn print_bitboards(&self, color: Color) {
-		if let Some(bitboards) = self.get(color) {
+impl BitboardPiecesUtils {
+	pub fn to_string(bb_pieces: &BitboardPieces, color: Color) {
+		if let Some(bitboards) = bb_pieces.get(color) {
 			let bitboards = bitboards
 				.iter()
 				.map(|bitboard| BitboardUtils::to_string(*bitboard));
