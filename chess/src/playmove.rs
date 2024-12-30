@@ -1,7 +1,7 @@
 use crate::{
 	board::{
-		bitboard::BitboardUtils, castle_right::CastleRightUtils, color::ColorUtils, piece::Pieces,
-		square::SquareUtils, Piece,
+		bitboard::BitboardUtils, castle_right::CastleRightUtils, color::ColorUtils,
+		piece::PieceUtils, square::SquareUtils,
 	},
 	history::OldState,
 	move_gen::Move,
@@ -31,22 +31,22 @@ impl Chess {
 			board.clear_en_passant();
 		}
 
-		if captured != Piece::NONE {
+		if captured != PieceUtils::NONE {
 			board.halfmove_clock = 0;
 			board.remove_piece(captured, opponent, to);
 
-			if captured == Piece::ROOK && has_caslte_rights {
+			if captured == PieceUtils::ROOK && has_caslte_rights {
 				board.update_castle_rights(board.castle_rights & !CastleRightUtils::SQUARES[to]);
 			}
 		}
 
-		if piece == Piece::PAWN {
+		if piece == PieceUtils::PAWN {
 			board.halfmove_clock = 0;
 
 			board.remove_piece(piece, color, from);
 			board.add_piece(
 				match promoted {
-					Piece::NONE => piece,
+					PieceUtils::NONE => piece,
 					_ => promoted,
 				},
 				color,
@@ -54,7 +54,7 @@ impl Chess {
 			);
 
 			if m.en_passant() {
-				board.remove_piece(Piece::PAWN, opponent, to ^ 8);
+				board.remove_piece(PieceUtils::PAWN, opponent, to ^ 8);
 			}
 
 			if m.two_step() {
@@ -64,27 +64,27 @@ impl Chess {
 			board.remove_piece(piece, color, from);
 			board.add_piece(piece, color, to);
 
-			if (piece == Piece::KING || piece == Piece::ROOK) && has_caslte_rights {
+			if (piece == PieceUtils::KING || piece == PieceUtils::ROOK) && has_caslte_rights {
 				board.update_castle_rights(board.castle_rights & !CastleRightUtils::SQUARES[from]);
 			}
 
 			if m.castling() {
 				match to {
 					SquareUtils::G1 => {
-						board.remove_piece(Piece::ROOK, color, SquareUtils::H1);
-						board.add_piece(Piece::ROOK, color, SquareUtils::F1);
+						board.remove_piece(PieceUtils::ROOK, color, SquareUtils::H1);
+						board.add_piece(PieceUtils::ROOK, color, SquareUtils::F1);
 					}
 					SquareUtils::C1 => {
-						board.remove_piece(Piece::ROOK, color, SquareUtils::A1);
-						board.add_piece(Piece::ROOK, color, SquareUtils::D1);
+						board.remove_piece(PieceUtils::ROOK, color, SquareUtils::A1);
+						board.add_piece(PieceUtils::ROOK, color, SquareUtils::D1);
 					}
 					SquareUtils::G8 => {
-						board.remove_piece(Piece::ROOK, color, SquareUtils::H8);
-						board.add_piece(Piece::ROOK, color, SquareUtils::F8);
+						board.remove_piece(PieceUtils::ROOK, color, SquareUtils::H8);
+						board.add_piece(PieceUtils::ROOK, color, SquareUtils::F8);
 					}
 					SquareUtils::C8 => {
-						board.remove_piece(Piece::ROOK, color, SquareUtils::A8);
-						board.add_piece(Piece::ROOK, color, SquareUtils::D8);
+						board.remove_piece(PieceUtils::ROOK, color, SquareUtils::A8);
+						board.add_piece(PieceUtils::ROOK, color, SquareUtils::D8);
 					}
 					_ => panic!("Invalid castling move: {}", SquareUtils::to_string(to)),
 				}
@@ -100,7 +100,7 @@ impl Chess {
 		let legal = !self.move_gen.square_attacked(
 			board,
 			opponent,
-			BitboardUtils::lsb(board.pieces[color][Piece::KING]),
+			BitboardUtils::lsb(board.pieces[color][PieceUtils::KING]),
 		);
 
 		if !legal {
@@ -132,42 +132,42 @@ impl Chess {
 			let captured = m.captured();
 			let promoted = m.promoted();
 
-			if m.promoted() == Piece::NONE {
+			if m.promoted() == PieceUtils::NONE {
 				board.remove_piece(piece, color, to);
 				board.add_piece(piece, color, from);
 
 				if m.castling() {
 					match to {
 						SquareUtils::G1 => {
-							board.remove_piece(Piece::ROOK, color, SquareUtils::F1);
-							board.add_piece(Piece::ROOK, color, SquareUtils::H1);
+							board.remove_piece(PieceUtils::ROOK, color, SquareUtils::F1);
+							board.add_piece(PieceUtils::ROOK, color, SquareUtils::H1);
 						}
 						SquareUtils::C1 => {
-							board.remove_piece(Piece::ROOK, color, SquareUtils::D1);
-							board.add_piece(Piece::ROOK, color, SquareUtils::A1);
+							board.remove_piece(PieceUtils::ROOK, color, SquareUtils::D1);
+							board.add_piece(PieceUtils::ROOK, color, SquareUtils::A1);
 						}
 						SquareUtils::G8 => {
-							board.remove_piece(Piece::ROOK, color, SquareUtils::F8);
-							board.add_piece(Piece::ROOK, color, SquareUtils::H8);
+							board.remove_piece(PieceUtils::ROOK, color, SquareUtils::F8);
+							board.add_piece(PieceUtils::ROOK, color, SquareUtils::H8);
 						}
 						SquareUtils::C8 => {
-							board.remove_piece(Piece::ROOK, color, SquareUtils::D8);
-							board.add_piece(Piece::ROOK, color, SquareUtils::A8);
+							board.remove_piece(PieceUtils::ROOK, color, SquareUtils::D8);
+							board.add_piece(PieceUtils::ROOK, color, SquareUtils::A8);
 						}
 						_ => panic!("Invalid castling move: {}", SquareUtils::to_string(to)),
 					}
 				}
 			} else {
 				board.remove_piece(promoted, color, to);
-				board.add_piece(Piece::PAWN, color, from);
+				board.add_piece(PieceUtils::PAWN, color, from);
 			}
 
-			if captured != Piece::NONE {
+			if captured != PieceUtils::NONE {
 				board.add_piece(captured, color ^ 1, to);
 			}
 
 			if m.en_passant() {
-				board.add_piece(Piece::PAWN, color ^ 1, to ^ 8);
+				board.add_piece(PieceUtils::PAWN, color ^ 1, to ^ 8);
 			}
 
 			board.hash = state.hash;

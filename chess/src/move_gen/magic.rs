@@ -47,7 +47,7 @@ pub mod gen {
 	use std::time::Instant;
 
 	use super::super::{Magic, MoveGen, BISHOP_TABLE_SIZE, ROOK_TABLE_SIZE};
-	use crate::board::{bitboard::BitboardUtils, piece::Pieces, square::SquareUtils, Piece};
+	use crate::board::{bitboard::BitboardUtils, piece::PieceUtils, square::SquareUtils, Piece};
 	use rand::Rng;
 
 	impl Magic {
@@ -55,8 +55,8 @@ pub mod gen {
 			let start = Instant::now();
 
 			let is_rook = match piece {
-				Piece::ROOK => true,
-				Piece::BISHOP => false,
+				PieceUtils::ROOK => true,
+				PieceUtils::BISHOP => false,
 				_ => panic!("Invalid piece: {piece}"),
 			};
 

@@ -2,35 +2,35 @@ use super::{color::ColorUtils, Color};
 
 pub type Piece = usize;
 
-pub trait Pieces {
-	const PAWN: Piece = 0;
-	const KNIGHT: Piece = 1;
-	const BISHOP: Piece = 2;
-	const ROOK: Piece = 3;
-	const QUEEN: Piece = 4;
-	const KING: Piece = 5;
-	const NONE: Piece = 6;
+pub struct PieceUtils;
+
+impl PieceUtils {
+	pub const SIZE: usize = 6;
+	pub const RANGE: std::ops::Range<usize> = 0..Self::SIZE;
 }
 
-pub trait PieceConsts {
-	const PIECE_SIZE: usize = 6;
-	const PIECE_RANGE: std::ops::Range<usize> = 0..Self::PIECE_SIZE;
+impl PieceUtils {
+	pub const PAWN: Piece = 0;
+	pub const KNIGHT: Piece = 1;
+	pub const BISHOP: Piece = 2;
+	pub const ROOK: Piece = 3;
+	pub const QUEEN: Piece = 4;
+	pub const KING: Piece = 5;
+	pub const NONE: Piece = 6;
 }
 
-pub trait PiecePromotions {
-	const PROMOTIONS: [Piece; 4] = [Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN];
+impl PieceUtils {
+	pub const PROMOTION_SIZE: usize = 4;
+	pub const PROMOTIONS: [Piece; Self::PROMOTION_SIZE] = [
+		PieceUtils::KNIGHT,
+		PieceUtils::BISHOP,
+		PieceUtils::ROOK,
+		PieceUtils::QUEEN,
+	];
 }
 
-impl Pieces for Piece {}
-impl PieceConsts for usize {}
-impl PiecePromotions for Piece {}
-
-pub trait GetPiece<T> {
-	fn get_piece(value: T) -> Self;
-}
-
-impl GetPiece<char> for Piece {
-	fn get_piece(value: char) -> Self {
+impl PieceUtils {
+	pub fn parse(value: char) -> Piece {
 		match value {
 			'P' | 'p' => Self::PAWN,
 			'N' | 'n' => Self::KNIGHT,
@@ -38,39 +38,33 @@ impl GetPiece<char> for Piece {
 			'R' | 'r' => Self::ROOK,
 			'Q' | 'q' => Self::QUEEN,
 			'K' | 'k' => Self::KING,
-			_ => panic!("Invalid piece: {value}"),
+			_ => panic!("Invalid piece: {}", value),
 		}
 	}
-}
 
-pub trait PieceString {
-	fn piece_string(&self, color: Color) -> String;
-}
-
-impl PieceString for Piece {
-	fn piece_string(&self, color: Color) -> String {
-		let ch = match *self {
-			Piece::PAWN => 'P',
-			Piece::KNIGHT => 'N',
-			Piece::BISHOP => 'B',
-			Piece::ROOK => 'R',
-			Piece::QUEEN => 'Q',
-			Piece::KING => 'K',
-			Piece::NONE => return String::from("None"),
-			_ => panic!("Invalid piece: {self}"),
+	pub fn to_string(piece: Piece, color: Color) -> String {
+		let ch = match piece {
+			Self::PAWN => 'P',
+			Self::KNIGHT => 'N',
+			Self::BISHOP => 'B',
+			Self::ROOK => 'R',
+			Self::QUEEN => 'Q',
+			Self::KING => 'K',
+			Self::NONE => return String::from("None"),
+			_ => panic!("Invalid piece: {piece}"),
 		};
 
 		String::from(match color {
 			ColorUtils::WHITE => ch,
 			ColorUtils::BLACK => ch.to_ascii_lowercase(),
 			ColorUtils::BOTH => {
-				let piece = match *self {
-					Piece::PAWN => "Pawn",
-					Piece::KNIGHT => "Knight",
-					Piece::BISHOP => "Bishop",
-					Piece::ROOK => "Rook",
-					Piece::QUEEN => "Queen",
-					Piece::KING => "King",
+				let piece = match piece {
+					Self::PAWN => "Pawn",
+					Self::KNIGHT => "Knight",
+					Self::BISHOP => "Bishop",
+					Self::ROOK => "Rook",
+					Self::QUEEN => "Queen",
+					Self::KING => "King",
 					_ => return String::from("None"),
 				};
 
