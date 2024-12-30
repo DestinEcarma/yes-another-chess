@@ -1,7 +1,7 @@
 // Marcel Vanthoor
 // https://github.com/mvanthoor/rustic
 
-use crate::board::{color::Colors, piece::PieceString, square::SquareString, Color, Piece, Square};
+use crate::board::{color::ColorUtils, piece::PieceUtils, square::SquareUtils, Piece, Square};
 use std::fmt::{self, Debug};
 
 #[derive(Copy, Clone, PartialEq)]
@@ -30,11 +30,11 @@ impl Debug for Move {
 		write!(
 			f,
 			"{}{} {} {} {} {en_passant} {two_step} {castling}",
-			from.square_string(),
-			to.square_string(),
-			piece.piece_string(Color::BOTH),
-			captured.piece_string(Color::BOTH),
-			promoted.piece_string(Color::BOTH),
+			SquareUtils::to_string(from),
+			SquareUtils::to_string(to),
+			PieceUtils::to_string(piece, ColorUtils::BOTH),
+			PieceUtils::to_string(captured, ColorUtils::BOTH),
+			PieceUtils::to_string(promoted, ColorUtils::BOTH),
 		)
 	}
 }
@@ -44,7 +44,12 @@ impl fmt::Display for Move {
 		let from = self.from();
 		let to = self.to();
 
-		write!(f, "{}{}", from.square_string(), to.square_string())
+		write!(
+			f,
+			"{}{}",
+			SquareUtils::to_string(from),
+			SquareUtils::to_string(to)
+		)
 	}
 }
 

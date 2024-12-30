@@ -1,14 +1,10 @@
-use bitboard::BitboardLSB;
-use castle_right::GetCastleRight;
-use square::GetSquare;
+use bitboard::BitboardUtils;
+use castle_right::CastleRightUtils;
+use file_rank::{FileUtils, RankUtils};
+use piece::PieceUtils;
+use square::SquareUtils;
 
 use super::*;
-use super::{
-	color::{ColorConsts, Colors, GetColor},
-	file_rank::{Files, Ranks},
-	piece::{GetPiece, PieceConsts},
-	square::SquareConsts,
-};
 
 impl From<&str> for Board {
 	fn from(value: &str) -> Self {
@@ -19,14 +15,14 @@ impl From<&str> for Board {
 impl From<(&str, Arc<HashTable>)> for Board {
 	fn from(value: (&str, Arc<HashTable>)) -> Self {
 		let mut board = Self {
-			pieces: [[Bitboard::default(); usize::PIECE_SIZE]; usize::COLOR_SIZE],
-			color: Color::WHITE,
+			pieces: [[BitboardUtils::EMPTY; PieceUtils::SIZE]; ColorUtils::SIZE],
+			color: ColorUtils::WHITE,
 			en_passant: None,
 			castle_rights: CastleRight::default(),
 
-			piece_list: [Piece::NONE; usize::SQUARE_SIZE],
-			occupancy: Bitboard::default(),
-			occupancy_color: [Bitboard::default(); usize::COLOR_SIZE],
+			piece_list: [PieceUtils::NONE; SquareUtils::SIZE],
+			occupancy: BitboardUtils::EMPTY,
+			occupancy_color: [BitboardUtils::EMPTY; ColorUtils::SIZE],
 
 			halfmove_clock: 0,
 			fullmove_number: 1,
@@ -61,32 +57,29 @@ impl Board {
 	fn init_hash(&mut self) {
 		self.hash = 0;
 
-		let bb_white = self.pieces[usize::WHITE];
-		let bb_black = self.pieces[usize::BLACK];
+		let bb_white = self.pieces[ColorUtils::WHITE];
+		let bb_black = self.pieces[ColorUtils::BLACK];
 
 		for (piece, (white, black)) in bb_white.iter().zip(bb_black.iter()).enumerate() {
 			let mut white_pieces = *white;
 			let mut black_pieces = *black;
 
 			while white_pieces > 0 {
-				let square = white_pieces.pop_lsb();
+				let square = BitboardUtils::pop_lsb(&mut white_pieces);
 
-				self.hash ^= self.hash_table.piece(piece, Color::WHITE, square);
+				self.hash ^= self.hash_table.piece(piece, ColorUtils::WHITE, square);
 			}
 
 			while black_pieces > 0 {
-				let square = black_pieces.pop_lsb();
+				let square = BitboardUtils::pop_lsb(&mut black_pieces);
 
-				self.hash ^= self.hash_table.piece(piece, Color::BLACK, square);
+				self.hash ^= self.hash_table.piece(piece, ColorUtils::BLACK, square);
 			}
 		}
 
 		self.hash ^= self.hash_table.color(self.color);
 		self.hash ^= self.hash_table.castle(self.castle_rights);
-
-		if let Some(en_passant) = self.en_passant {
-			self.hash ^= self.hash_table.en_passant(en_passant);
-		}
+		self.hash ^= self.hash_table.en_passant(self.en_passant);
 	}
 }
 
@@ -94,14 +87,14 @@ struct BoardBuilder;
 
 impl BoardBuilder {
 	fn set_pieces(board: &mut Board, pieces: &str) {
-		let mut rank = Rank::R8;
-		let mut file = File::A;
+		let mut rank = RankUtils::R8;
+		let mut file = FileUtils::A;
 
 		for ch in pieces.chars() {
 			match ch {
 				'/' => {
 					rank -= 1;
-					file = File::A;
+					file = FileUtils::A;
 				}
 				'1'..='8' => {
 					for _ in 0..ch.to_digit(10).unwrap() {
@@ -110,9 +103,9 @@ impl BoardBuilder {
 				}
 				_ => {
 					board.add_piece(
-						Piece::get_piece(ch),
-						Color::get_color(ch.is_uppercase()),
-						Square::get_square((file, rank)),
+						PieceUtils::parse(ch),
+						ColorUtils::from_bool(ch.is_uppercase()),
+						SquareUtils::from_location(file, rank),
 					);
 					file += 1;
 				}
@@ -122,7 +115,7 @@ impl BoardBuilder {
 
 	fn set_color(board: &mut Board, color: &str) {
 		if let Some(ch) = color.chars().next() {
-			board.color = Color::get_color(ch);
+			board.color = ColorUtils::parse(ch);
 		}
 	}
 
@@ -132,13 +125,13 @@ impl BoardBuilder {
 		}
 
 		for ch in castling_rights.chars() {
-			board.castle_rights |= CastleRight::get_castle_right(ch);
+			board.castle_rights |= CastleRightUtils::parse(ch);
 		}
 	}
 
 	fn set_en_passant(board: &mut Board, en_passant: &str) {
 		if en_passant != "-" {
-			board.en_passant = Some(Square::get_square(en_passant));
+			board.en_passant = Some(SquareUtils::parse(en_passant));
 		}
 	}
 }

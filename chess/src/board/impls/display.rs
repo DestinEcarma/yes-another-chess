@@ -1,15 +1,9 @@
-use castle_right::CastleRightString;
-use file_rank::Ranks;
-use square::SquareString;
+use castle_right::CastleRightUtils;
+use file_rank::{FileUtils, RankUtils};
+use piece::PieceUtils;
+use square::SquareUtils;
 
 use super::*;
-use super::{
-	bitboard::BitboardOccupied,
-	color::{ColorConsts, ColorString},
-	file_rank::FileRankConsts,
-	piece::PieceString,
-	square::GetSquare,
-};
 use std::fmt;
 
 impl fmt::Display for Board {
@@ -22,11 +16,11 @@ impl Board {
 	fn get_piece(&self, square: Square) -> Option<(Piece, Color)> {
 		let piece = self.piece_list[square];
 
-		if piece == Piece::NONE {
+		if piece == PieceUtils::NONE {
 			None
 		} else {
-			for color in Color::COLOR_RANGE {
-				if self.pieces[color][piece].occupied(square) {
+			for color in ColorUtils::RANGE {
+				if BitboardUtils::occupied(self.pieces[color][piece], square) {
 					return Some((piece, color));
 				}
 			}
@@ -38,12 +32,12 @@ impl Board {
 	fn board_string(&self) -> String {
 		let mut board = String::from("   +---+---+---+---+---+---+---+---+\n");
 
-		for rank in usize::FILE_RANK_RANGE.rev() {
+		for rank in RankUtils::RANGE.rev() {
 			board += &format!(" {rank} ");
 
-			for file in usize::FILE_RANK_RANGE {
-				let piece = match self.get_piece(Square::get_square((file, rank))) {
-					Some((piece, color)) => piece.piece_string(color),
+			for file in FileUtils::RANGE {
+				let piece = match self.get_piece(SquareUtils::from_location(file, rank)) {
+					Some((piece, color)) => PieceUtils::to_string(piece, color),
 					None => " ".to_string(),
 				};
 
@@ -59,11 +53,11 @@ impl Board {
 	fn fen_string(&self) -> String {
 		let mut pieces = String::new();
 
-		for rank in usize::FILE_RANK_RANGE.rev() {
+		for rank in RankUtils::RANGE.rev() {
 			let mut empty = 0;
 
-			for file in usize::FILE_RANK_RANGE {
-				let square = Square::get_square((file, rank));
+			for file in FileUtils::RANGE {
+				let square = SquareUtils::from_location(file, rank);
 
 				match self.get_piece(square) {
 					Some((piece, color)) => {
@@ -72,7 +66,7 @@ impl Board {
 							empty = 0;
 						}
 
-						pieces.push_str(&piece.piece_string(color));
+						pieces.push_str(&PieceUtils::to_string(piece, color));
 					}
 					None => empty += 1,
 				}
@@ -82,16 +76,16 @@ impl Board {
 				pieces.push_str(&empty.to_string());
 			}
 
-			if rank > Rank::R1 {
+			if rank > RankUtils::R1 {
 				pieces += "/";
 			}
 		}
 
-		let color = self.color.color_string();
-		let castle_rights = &self.castle_rights.castle_right_string();
+		let color = ColorUtils::to_string(self.color);
+		let castle_rights = CastleRightUtils::to_string(self.castle_rights);
 
 		let en_passant = match self.en_passant {
-			Some(square) => square.square_string(),
+			Some(square) => SquareUtils::to_string(square),
 			None => "-".to_string(),
 		};
 

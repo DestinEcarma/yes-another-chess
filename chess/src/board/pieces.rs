@@ -1,30 +1,33 @@
-use super::{
-	bitboard::BitboardString, color::ColorConsts, file_rank::FileRankConsts, piece::PieceConsts,
-	square::SquareConsts, Bitboard, Color, Piece,
-};
+use crate::board::{bitboard::BitboardUtils, file_rank::RankUtils};
 
-pub type PieceList = [Piece; usize::SQUARE_SIZE];
-pub type BitboardPieces = [[Bitboard; usize::PIECE_SIZE]; usize::COLOR_SIZE];
+use super::{color::ColorUtils, piece::PieceUtils, square::SquareUtils, Bitboard, Color, Piece};
 
-pub trait PrintBitboards {
-	fn print_bitboards(&self, color: Color);
-}
+pub type PieceList = [Piece; SquareUtils::SIZE];
+pub type BitboardPieces = [[Bitboard; PieceUtils::SIZE]; ColorUtils::SIZE];
 
-impl PrintBitboards for BitboardPieces {
-	fn print_bitboards(&self, color: Color) {
-		if let Some(bitboards) = self.get(color) {
-			let bitboards = bitboards.iter().map(|bitboard| bitboard.bitboard_string());
+pub struct BitboardPiecesUtils;
+
+impl BitboardPiecesUtils {
+	pub fn to_string(bb_pieces: &BitboardPieces, color: Color) {
+		if let Some(bitboards) = bb_pieces.get(color) {
+			let bitboards = bitboards
+				.iter()
+				.map(|bitboard| BitboardUtils::to_string(*bitboard));
 
 			let lines = bitboards
-				.map(|s| s.lines().map(|s| s.to_string()).collect::<Vec<String>>())
-				.collect::<Vec<Vec<String>>>();
+				.map(|s| s.lines().map(|s| s.to_string()).collect::<Vec<_>>())
+				.collect::<Vec<_>>();
+
+			let piece = PieceUtils::RANGE
+				.map(|piece| PieceUtils::to_string(piece, ColorUtils::BOTH))
+				.collect::<Vec<_>>();
 
 			let mut output = format!(
 				"\n{:<17}{:<17}{:<17}{:<17}{:<17}{:<17}",
-				"King", "Queen", "Rook", "Bishop", "Knight", "Pawn"
+				piece[0], piece[1], piece[2], piece[3], piece[4], piece[5]
 			);
 
-			for rank in usize::FILE_RANK_RANGE.rev() {
+			for rank in RankUtils::RANGE {
 				let mut combined_line = String::new();
 
 				for (piece, line) in lines.iter().enumerate() {

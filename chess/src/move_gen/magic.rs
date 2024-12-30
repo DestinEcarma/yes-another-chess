@@ -1,6 +1,6 @@
 // Derived from https://github.com/mvanthoor/rustic
 
-use crate::board::{square::SquareConsts, Bitboard};
+use crate::board::{square::SquareUtils, Bitboard};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Magic {
@@ -12,7 +12,7 @@ pub struct Magic {
 
 impl Magic {
 	#[rustfmt::skip]
-	pub const ROOK: [u64; usize::SQUARE_SIZE] = [
+	pub const ROOK: [u64; SquareUtils::SIZE] = [
 		0x008000108a204000, 0x0140012000441000, 0x0c80100080200508, 0x0180080006100080, 0x0080040058008042, 0x80801400800a0001, 0x0400021021018824, 0x04800080006a4100,
 		0x098080008c29c002, 0xf011004000810020, 0x0401001900402000, 0x010200102200401a, 0x0000800400080080, 0x03c0801200040180, 0x8004000430680326, 0x3108800080004900,
 		0x00004d0021008001, 0x1120004000403000, 0xa00a020020809042, 0x0010008008011380, 0x0201010004114800, 0x0001010008028400, 0x0210e40003288a10, 0x0027460001048344,
@@ -24,7 +24,7 @@ impl Magic {
 	];
 
 	#[rustfmt::skip]
-	pub const BISHOP: [u64; usize::SQUARE_SIZE] = [
+	pub const BISHOP: [u64; crate::board::square::SquareUtils::SIZE] = [
 		0x0842084131140100, 0x000810268ea10009, 0x004808010a200084, 0x4208218620880004, 0x0044050402204020, 0x2009041242881000, 0x0011880808041091, 0x0d12004242082010,
 		0x0000258428020401, 0x0000100401144201, 0x0082300400425001, 0x0208040c12800016, 0x14042e0210000000, 0x0022008220200404, 0x0814348410021000, 0x0004005404052810,
 		0x2219084022040420, 0x8022022004040480, 0x00a0442202040060, 0x0304000802542001, 0x4093800c00a00029, 0x0880200e10042000, 0x0203080584104602, 0x0000600202050409,
@@ -47,7 +47,7 @@ pub mod gen {
 	use std::time::Instant;
 
 	use super::super::{Magic, MoveGen, BISHOP_TABLE_SIZE, ROOK_TABLE_SIZE};
-	use crate::board::{piece::Pieces, square::SquareConsts, Bitboard, Piece, Square};
+	use crate::board::{bitboard::BitboardUtils, piece::PieceUtils, square::SquareUtils, Piece};
 	use rand::Rng;
 
 	impl Magic {
@@ -55,14 +55,14 @@ pub mod gen {
 			let start = Instant::now();
 
 			let is_rook = match piece {
-				Piece::ROOK => true,
-				Piece::BISHOP => false,
+				PieceUtils::ROOK => true,
+				PieceUtils::BISHOP => false,
 				_ => panic!("Invalid piece: {piece}"),
 			};
 
 			let mut table = match is_rook {
-				true => vec![Bitboard::default(); ROOK_TABLE_SIZE],
-				false => vec![Bitboard::default(); BISHOP_TABLE_SIZE],
+				true => vec![BitboardUtils::EMPTY; ROOK_TABLE_SIZE],
+				false => vec![BitboardUtils::EMPTY; BISHOP_TABLE_SIZE],
 			};
 
 			let mut random = rand::thread_rng();
@@ -70,7 +70,7 @@ pub mod gen {
 
 			println!("Generating magics for {piece}");
 
-			for square in Square::SQUARE_RANGE {
+			for square in SquareUtils::RANGE {
 				let mask = match is_rook {
 					true => MoveGen::rook_mask(square),
 					false => MoveGen::bishop_mask(square),
@@ -113,7 +113,7 @@ pub mod gen {
 							table[index] = attacks[next];
 						} else {
 							for wipe_index in offset..=end {
-								table[wipe_index as usize] = Bitboard::default();
+								table[wipe_index as usize] = BitboardUtils::EMPTY;
 							}
 
 							found = false;

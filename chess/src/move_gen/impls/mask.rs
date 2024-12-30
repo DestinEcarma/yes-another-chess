@@ -1,29 +1,29 @@
 use super::{AttackTable, BlockerTable, Direction, MoveGen};
 use crate::board::{
-	bitboard::{BitboardFiles, BitboardOccupied, BitboardRanks, BitboardSquares},
-	file_rank::{Files, Ranks},
-	square::SquareLocation,
-	Bitboard, File, Rank, Square,
+	bitboard::BitboardUtils,
+	file_rank::{FileUtils, RankUtils},
+	square::SquareUtils,
+	Bitboard, Square,
 };
 
 impl MoveGen {
 	pub fn rook_mask(square: Square) -> Bitboard {
 		let edges = Self::edges(square);
-		let (file, rank) = square.location();
+		let (file, rank) = SquareUtils::location(square);
 
-		let mask = Bitboard::RANKS[rank] | Bitboard::FILES[file];
+		let mask = BitboardUtils::RANKS[rank] | BitboardUtils::FILES[file];
 
-		mask & !edges & !Bitboard::SQUARES[square]
+		mask & !edges & !BitboardUtils::SQUARES[square]
 	}
 
 	pub fn bishop_mask(square: Square) -> Bitboard {
 		let edges = Self::edges(square);
-		let mask = Self::ray(Bitboard::default(), square, Direction::NorthEast)
-			| Self::ray(Bitboard::default(), square, Direction::NorthWest)
-			| Self::ray(Bitboard::default(), square, Direction::SouthEast)
-			| Self::ray(Bitboard::default(), square, Direction::SouthWest);
+		let mask = Self::ray(BitboardUtils::EMPTY, square, Direction::NorthEast)
+			| Self::ray(BitboardUtils::EMPTY, square, Direction::NorthWest)
+			| Self::ray(BitboardUtils::EMPTY, square, Direction::SouthEast)
+			| Self::ray(BitboardUtils::EMPTY, square, Direction::SouthWest);
 
-		mask & !edges & !Bitboard::SQUARES[square]
+		mask & !edges & !BitboardUtils::SQUARES[square]
 	}
 
 	pub fn rook_attacks(square: Square, blockers: &BlockerTable) -> AttackTable {
@@ -58,7 +58,7 @@ impl MoveGen {
 
 	pub fn blockers(mask: Bitboard) -> BlockerTable {
 		let mut blockers = BlockerTable::default();
-		let mut bitboard = Bitboard::default();
+		let mut bitboard = BitboardUtils::EMPTY;
 
 		// Carry-Rippler
 		// https://www.chessprogramming.org/Traversing_Subsets_of_a_Set
@@ -75,25 +75,25 @@ impl MoveGen {
 	}
 
 	fn edges(square: Square) -> Bitboard {
-		let (file, rank) = square.location();
+		let (file, rank) = SquareUtils::location(square);
 
-		let bitboard_file = Bitboard::FILES[file];
-		let bitboard_rank = Bitboard::RANKS[rank];
+		let bitboard_file = BitboardUtils::FILES[file];
+		let bitboard_rank = BitboardUtils::RANKS[rank];
 
-		(!bitboard_file & Bitboard::FILES[File::A])
-			| (!bitboard_file & Bitboard::FILES[File::H])
-			| (!bitboard_rank & Bitboard::RANKS[Rank::R1])
-			| (!bitboard_rank & Bitboard::RANKS[Rank::R8])
+		(!bitboard_file & BitboardUtils::FILES[FileUtils::A])
+			| (!bitboard_file & BitboardUtils::FILES[FileUtils::H])
+			| (!bitboard_rank & BitboardUtils::RANKS[RankUtils::R1])
+			| (!bitboard_rank & BitboardUtils::RANKS[RankUtils::R8])
 	}
 
 	fn ray(bitboard: Bitboard, mut square: Square, direction: Direction) -> Bitboard {
-		let mut ray = Bitboard::default();
+		let mut ray = BitboardUtils::EMPTY;
 
 		while !(direction == square) {
 			square += direction;
-			ray |= Bitboard::SQUARES[square];
+			ray |= BitboardUtils::SQUARES[square];
 
-			if bitboard.occupied(square) {
+			if BitboardUtils::occupied(bitboard, square) {
 				break;
 			}
 		}

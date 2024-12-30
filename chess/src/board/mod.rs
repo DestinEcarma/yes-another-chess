@@ -10,9 +10,9 @@ pub mod pieces;
 pub mod square;
 pub mod zobrist;
 
-use bitboard::BitboardSquares;
-use color::ColorConsts;
-use piece::Pieces;
+use bitboard::BitboardUtils;
+use color::ColorUtils;
+use piece::PieceUtils;
 use std::sync::Arc;
 use zobrist::{HashTable, ZobristHash};
 
@@ -28,7 +28,7 @@ pub struct Board {
 	pub piece_list: PieceList,
 
 	pub occupancy: Bitboard,
-	pub occupancy_color: [Bitboard; usize::COLOR_SIZE],
+	pub occupancy_color: [Bitboard; ColorUtils::SIZE],
 
 	pub halfmove_clock: u8,
 	pub fullmove_number: u16,
@@ -48,21 +48,21 @@ impl Board {
 	#[inline(always)]
 	pub fn add_piece(&mut self, piece: Piece, color: Color, square: Square) {
 		self.piece_list[square] = piece;
-		self.pieces[color][piece] |= Bitboard::SQUARES[square];
+		self.pieces[color][piece] |= BitboardUtils::SQUARES[square];
 
-		self.occupancy |= Bitboard::SQUARES[square];
-		self.occupancy_color[color] |= Bitboard::SQUARES[square];
+		self.occupancy |= BitboardUtils::SQUARES[square];
+		self.occupancy_color[color] |= BitboardUtils::SQUARES[square];
 
 		self.hash ^= self.hash_table.piece(piece, color, square);
 	}
 
 	#[inline(always)]
 	pub fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
-		self.piece_list[square] = Piece::NONE;
-		self.pieces[color][piece] &= !(Bitboard::SQUARES[square]);
+		self.piece_list[square] = PieceUtils::NONE;
+		self.pieces[color][piece] &= !(BitboardUtils::SQUARES[square]);
 
-		self.occupancy &= !(Bitboard::SQUARES[square]);
-		self.occupancy_color[color] &= !(Bitboard::SQUARES[square]);
+		self.occupancy &= !(BitboardUtils::SQUARES[square]);
+		self.occupancy_color[color] &= !(BitboardUtils::SQUARES[square]);
 
 		self.hash ^= self.hash_table.piece(piece, color, square);
 	}
@@ -83,16 +83,16 @@ impl Board {
 
 	#[inline(always)]
 	pub fn set_en_passant(&mut self, square: Square) {
+		self.hash ^= self.hash_table.en_passant(self.en_passant);
 		self.en_passant = Some(square);
-		self.hash ^= self.hash_table.en_passant(square);
+		self.hash ^= self.hash_table.en_passant(self.en_passant);
 	}
 
 	#[inline(always)]
 	pub fn clear_en_passant(&mut self) {
-		if let Some(en_passant) = self.en_passant {
-			self.hash ^= self.hash_table.en_passant(en_passant);
-			self.en_passant = None;
-		}
+		self.hash ^= self.hash_table.en_passant(self.en_passant);
+		self.en_passant = None;
+		self.hash ^= self.hash_table.en_passant(self.en_passant);
 	}
 }
 

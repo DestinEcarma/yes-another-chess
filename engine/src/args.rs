@@ -1,5 +1,5 @@
 use chess::{
-	board::{color::Colors, piece::Pieces, pieces::PrintBitboards, Board, Color},
+	board::{color::ColorUtils, pieces::BitboardPiecesUtils, Board, Color},
 	move_gen::MoveGen,
 	Chess,
 };
@@ -64,9 +64,9 @@ pub fn display(fen: Option<String>, bitboards: bool) {
 		false => println!("{board}"),
 		true => {
 			println!("White Pieces:");
-			board.pieces.print_bitboards(Color::WHITE);
+			BitboardPiecesUtils::to_string(&board.pieces, ColorUtils::WHITE);
 			println!("Black Pieces:");
-			board.pieces.print_bitboards(Color::BLACK);
+			BitboardPiecesUtils::to_string(&board.pieces, ColorUtils::BLACK);
 		}
 	}
 }
@@ -85,11 +85,14 @@ pub fn perft(depth: u8, fen: String, threads: usize, hash: Option<String>) {
 
 #[cfg(debug_assertions)]
 pub fn magic(piece: MagicPiece) {
-	use chess::{board::Piece, move_gen::Magic};
+	use chess::{
+		board::{piece::PieceUtils, Piece},
+		move_gen::Magic,
+	};
 
 	let piece = match piece {
-		MagicPiece::Rook => Piece::ROOK,
-		MagicPiece::Bishop => Piece::BISHOP,
+		MagicPiece::Rook => PieceUtils::ROOK,
+		MagicPiece::Bishop => PieceUtils::BISHOP,
 	};
 
 	Magic::generate(piece);

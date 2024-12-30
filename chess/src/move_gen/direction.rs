@@ -1,7 +1,7 @@
 use crate::board::{
-	file_rank::{Files, Ranks},
-	square::SquareLocation,
-	File, Rank, Square,
+	file_rank::{FileUtils, RankUtils},
+	square::SquareUtils,
+	Square,
 };
 use std::ops;
 
@@ -19,17 +19,17 @@ pub enum Direction {
 
 impl PartialEq<Square> for Direction {
 	fn eq(&self, other: &Square) -> bool {
-		let (file, rank) = other.location();
+		let (file, rank) = SquareUtils::location(*other);
 
 		match self {
-			Self::North => rank == Rank::R8,
-			Self::South => rank == Rank::R1,
-			Self::East => file == File::H,
-			Self::West => file == File::A,
-			Self::NorthEast => rank == Rank::R8 || file == File::H,
-			Self::NorthWest => rank == Rank::R8 || file == File::A,
-			Self::SouthEast => rank == Rank::R1 || file == File::H,
-			Self::SouthWest => rank == Rank::R1 || file == File::A,
+			Self::North => rank == RankUtils::R8,
+			Self::South => rank == RankUtils::R1,
+			Self::East => file == FileUtils::H,
+			Self::West => file == FileUtils::A,
+			Self::NorthEast => rank == RankUtils::R8 || file == FileUtils::H,
+			Self::NorthWest => rank == RankUtils::R8 || file == FileUtils::A,
+			Self::SouthEast => rank == RankUtils::R1 || file == FileUtils::H,
+			Self::SouthWest => rank == RankUtils::R1 || file == FileUtils::A,
 		}
 	}
 }
