@@ -1,9 +1,9 @@
 use bitboard::BitboardUtils;
 use castle_right::CastleRightUtils;
 use file_rank::{FileUtils, RankUtils};
+use piece::PieceUtils;
 use square::SquareUtils;
 
-use super::piece::{GetPiece, PieceConsts};
 use super::*;
 
 impl From<&str> for Board {
@@ -15,12 +15,12 @@ impl From<&str> for Board {
 impl From<(&str, Arc<HashTable>)> for Board {
 	fn from(value: (&str, Arc<HashTable>)) -> Self {
 		let mut board = Self {
-			pieces: [[BitboardUtils::EMPTY; usize::PIECE_SIZE]; ColorUtils::SIZE],
+			pieces: [[BitboardUtils::EMPTY; PieceUtils::SIZE]; ColorUtils::SIZE],
 			color: ColorUtils::WHITE,
 			en_passant: None,
 			castle_rights: CastleRight::default(),
 
-			piece_list: [Piece::NONE; SquareUtils::SIZE],
+			piece_list: [PieceUtils::NONE; SquareUtils::SIZE],
 			occupancy: BitboardUtils::EMPTY,
 			occupancy_color: [BitboardUtils::EMPTY; ColorUtils::SIZE],
 
@@ -103,7 +103,7 @@ impl BoardBuilder {
 				}
 				_ => {
 					board.add_piece(
-						Piece::get_piece(ch),
+						PieceUtils::parse(ch),
 						ColorUtils::from_bool(ch.is_uppercase()),
 						SquareUtils::from_location(file, rank),
 					);

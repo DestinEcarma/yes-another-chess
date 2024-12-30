@@ -12,7 +12,7 @@ pub mod zobrist;
 
 use bitboard::BitboardUtils;
 use color::ColorUtils;
-use piece::Pieces;
+use piece::PieceUtils;
 use std::sync::Arc;
 use zobrist::{HashTable, ZobristHash};
 
@@ -58,7 +58,7 @@ impl Board {
 
 	#[inline(always)]
 	pub fn remove_piece(&mut self, piece: Piece, color: Color, square: Square) {
-		self.piece_list[square] = Piece::NONE;
+		self.piece_list[square] = PieceUtils::NONE;
 		self.pieces[color][piece] &= !(BitboardUtils::SQUARES[square]);
 
 		self.occupancy &= !(BitboardUtils::SQUARES[square]);

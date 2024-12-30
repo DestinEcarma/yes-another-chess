@@ -7,13 +7,9 @@ mod prelude;
 
 use crate::{
 	board::{
-		bitboard::BitboardUtils,
-		castle_right::CastleRightUtils,
-		color::ColorUtils,
-		file_rank::RankUtils,
-		piece::{PiecePromotions, Pieces},
-		square::SquareUtils,
-		Bitboard, Board, Piece, Square,
+		bitboard::BitboardUtils, castle_right::CastleRightUtils, color::ColorUtils,
+		file_rank::RankUtils, piece::PieceUtils, square::SquareUtils, Bitboard, Board, Piece,
+		Square,
 	},
 	move_list::MoveList,
 };
@@ -34,12 +30,12 @@ impl MoveGen {
 	#[inline(always)]
 	pub fn king(&self, board: &Board, list: &mut MoveList) {
 		let color = board.color;
-		let mut piece = board.pieces[color][Piece::KING];
+		let mut piece = board.pieces[color][PieceUtils::KING];
 
 		let square = BitboardUtils::pop_lsb(&mut piece);
 		let moves = self.king[square] & !board.ally();
 
-		self.add_move(board, Piece::KING, square, moves, list);
+		self.add_move(board, PieceUtils::KING, square, moves, list);
 	}
 
 	#[inline(always)]
@@ -48,7 +44,7 @@ impl MoveGen {
 		let occupancy = board.occupancy;
 		let ally = board.ally();
 
-		let mut pieces = board.pieces[color][Piece::QUEEN];
+		let mut pieces = board.pieces[color][PieceUtils::QUEEN];
 
 		while pieces > 0 {
 			let square = BitboardUtils::pop_lsb(&mut pieces);
@@ -57,7 +53,7 @@ impl MoveGen {
 			let bishop_index = self.bishop_magics[square].index(occupancy);
 			let moves = (self.rooks[rook_index] | self.bishops[bishop_index]) & !ally;
 
-			self.add_move(board, Piece::QUEEN, square, moves, list);
+			self.add_move(board, PieceUtils::QUEEN, square, moves, list);
 		}
 	}
 
@@ -67,7 +63,7 @@ impl MoveGen {
 		let occupancy = board.occupancy;
 		let ally = board.ally();
 
-		let mut pieces = board.pieces[color][Piece::ROOK];
+		let mut pieces = board.pieces[color][PieceUtils::ROOK];
 
 		while pieces > 0 {
 			let square = BitboardUtils::pop_lsb(&mut pieces);
@@ -75,7 +71,7 @@ impl MoveGen {
 			let index = self.rook_magics[square].index(occupancy);
 			let moves = self.rooks[index] & !ally;
 
-			self.add_move(board, Piece::ROOK, square, moves, list);
+			self.add_move(board, PieceUtils::ROOK, square, moves, list);
 		}
 	}
 
@@ -85,7 +81,7 @@ impl MoveGen {
 		let occupancy = board.occupancy;
 		let ally = board.ally();
 
-		let mut pieces = board.pieces[color][Piece::BISHOP];
+		let mut pieces = board.pieces[color][PieceUtils::BISHOP];
 
 		while pieces > 0 {
 			let square = BitboardUtils::pop_lsb(&mut pieces);
@@ -93,7 +89,7 @@ impl MoveGen {
 			let index = self.bishop_magics[square].index(occupancy);
 			let moves = self.bishops[index] & !ally;
 
-			self.add_move(board, Piece::BISHOP, square, moves, list);
+			self.add_move(board, PieceUtils::BISHOP, square, moves, list);
 		}
 	}
 
@@ -102,13 +98,13 @@ impl MoveGen {
 		let color = board.color;
 		let ally = board.ally();
 
-		let mut pieces = board.pieces[color][Piece::KNIGHT];
+		let mut pieces = board.pieces[color][PieceUtils::KNIGHT];
 
 		while pieces > 0 {
 			let square = BitboardUtils::pop_lsb(&mut pieces);
 			let moves = self.knight[square] & !ally;
 
-			self.add_move(board, Piece::KNIGHT, square, moves, list);
+			self.add_move(board, PieceUtils::KNIGHT, square, moves, list);
 		}
 	}
 
@@ -132,7 +128,7 @@ impl MoveGen {
 
 		let rotation_count = (SquareUtils::SIZE + direction) as u32;
 
-		let mut pieces = board.pieces[color][Piece::PAWN];
+		let mut pieces = board.pieces[color][PieceUtils::PAWN];
 
 		while pieces > 0 {
 			let square = BitboardUtils::pop_lsb(&mut pieces);
@@ -151,7 +147,7 @@ impl MoveGen {
 
 			let moves = one_step | two_step | captures | en_passant;
 
-			self.add_move(board, Piece::PAWN, square, moves, list);
+			self.add_move(board, PieceUtils::PAWN, square, moves, list);
 		}
 	}
 
@@ -174,7 +170,7 @@ impl MoveGen {
 				{
 					self.add_move(
 						board,
-						Piece::KING,
+						PieceUtils::KING,
 						SquareUtils::E1,
 						BitboardUtils::SQUARES[SquareUtils::G1],
 						list,
@@ -193,7 +189,7 @@ impl MoveGen {
 				{
 					self.add_move(
 						board,
-						Piece::KING,
+						PieceUtils::KING,
 						SquareUtils::E1,
 						BitboardUtils::SQUARES[SquareUtils::C1],
 						list,
@@ -211,7 +207,7 @@ impl MoveGen {
 				{
 					self.add_move(
 						board,
-						Piece::KING,
+						PieceUtils::KING,
 						SquareUtils::E8,
 						BitboardUtils::SQUARES[SquareUtils::G8],
 						list,
@@ -230,7 +226,7 @@ impl MoveGen {
 				{
 					self.add_move(
 						board,
-						Piece::KING,
+						PieceUtils::KING,
 						SquareUtils::E8,
 						BitboardUtils::SQUARES[SquareUtils::C8],
 						list,
@@ -253,7 +249,7 @@ impl MoveGen {
 	) {
 		let mut moves = moves;
 		let color = board.color;
-		let is_pawn = Piece::PAWN == piece;
+		let is_pawn = PieceUtils::PAWN == piece;
 
 		let promotion_rank = match color {
 			ColorUtils::WHITE => RankUtils::R8,
@@ -273,7 +269,7 @@ impl MoveGen {
 			let promotion =
 				is_pawn && BitboardUtils::occupied(BitboardUtils::RANKS[promotion_rank], to);
 			let two_step = is_pawn && (to as i8 - from as i8).abs() == 16;
-			let castling = piece == Piece::KING && (from as i8 - to as i8).abs() == 2;
+			let castling = piece == PieceUtils::KING && (from as i8 - to as i8).abs() == 2;
 
 			let move_data = piece
 				| from << Move::FROM_SQUARE
@@ -284,9 +280,9 @@ impl MoveGen {
 				| (castling as usize) << Move::CASTLING;
 
 			if !promotion {
-				list.push(Move::new(move_data | Piece::NONE << Move::PROMOTION));
+				list.push(Move::new(move_data | PieceUtils::NONE << Move::PROMOTION));
 			} else {
-				for piece in Piece::PROMOTIONS {
+				for piece in PieceUtils::PROMOTIONS {
 					list.push(Move::new(move_data | piece << Move::PROMOTION));
 				}
 			}

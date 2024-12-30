@@ -3,7 +3,7 @@ use crate::board::{
 	bitboard::BitboardUtils,
 	color::ColorUtils,
 	file_rank::{FileUtils, RankUtils},
-	piece::{PieceString, Pieces},
+	piece::PieceUtils,
 	square::SquareUtils,
 	Piece,
 };
@@ -21,8 +21,8 @@ impl Default for MoveGen {
 		};
 
 		move_gen.init_king();
-		move_gen.init_magic(Piece::ROOK);
-		move_gen.init_magic(Piece::BISHOP);
+		move_gen.init_magic(PieceUtils::ROOK);
+		move_gen.init_magic(PieceUtils::BISHOP);
 		move_gen.init_knight();
 		move_gen.init_pawn();
 
@@ -112,11 +112,11 @@ impl MoveGen {
 	// https://github.com/mvanthoor/rustic
 	fn init_magic(&mut self, piece: Piece) {
 		let is_rook = match piece {
-			Piece::ROOK => true,
-			Piece::BISHOP => false,
+			PieceUtils::ROOK => true,
+			PieceUtils::BISHOP => false,
 			_ => panic!(
 				"Invalid magic piece: {}",
-				piece.piece_string(ColorUtils::BOTH)
+				PieceUtils::to_string(piece, ColorUtils::BOTH)
 			),
 		};
 

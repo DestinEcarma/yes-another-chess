@@ -1,5 +1,5 @@
 use chess::{
-	board::{color::ColorUtils, piece::Pieces, pieces::PrintBitboards, Board, Color},
+	board::{color::ColorUtils, pieces::PrintBitboards, Board, Color},
 	move_gen::MoveGen,
 	Chess,
 };
@@ -85,11 +85,14 @@ pub fn perft(depth: u8, fen: String, threads: usize, hash: Option<String>) {
 
 #[cfg(debug_assertions)]
 pub fn magic(piece: MagicPiece) {
-	use chess::{board::Piece, move_gen::Magic};
+	use chess::{
+		board::{piece::PieceUtils, Piece},
+		move_gen::Magic,
+	};
 
 	let piece = match piece {
-		MagicPiece::Rook => Piece::ROOK,
-		MagicPiece::Bishop => Piece::BISHOP,
+		MagicPiece::Rook => PieceUtils::ROOK,
+		MagicPiece::Bishop => PieceUtils::BISHOP,
 	};
 
 	Magic::generate(piece);

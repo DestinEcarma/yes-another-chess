@@ -1,8 +1,8 @@
 use castle_right::CastleRightUtils;
 use file_rank::{FileUtils, RankUtils};
+use piece::PieceUtils;
 use square::SquareUtils;
 
-use super::piece::PieceString;
 use super::*;
 use std::fmt;
 
@@ -16,7 +16,7 @@ impl Board {
 	fn get_piece(&self, square: Square) -> Option<(Piece, Color)> {
 		let piece = self.piece_list[square];
 
-		if piece == Piece::NONE {
+		if piece == PieceUtils::NONE {
 			None
 		} else {
 			for color in ColorUtils::RANGE {
@@ -37,7 +37,7 @@ impl Board {
 
 			for file in FileUtils::RANGE {
 				let piece = match self.get_piece(SquareUtils::from_location(file, rank)) {
-					Some((piece, color)) => piece.piece_string(color),
+					Some((piece, color)) => PieceUtils::to_string(piece, color),
 					None => " ".to_string(),
 				};
 
@@ -66,7 +66,7 @@ impl Board {
 							empty = 0;
 						}
 
-						pieces.push_str(&piece.piece_string(color));
+						pieces.push_str(&PieceUtils::to_string(piece, color));
 					}
 					None => empty += 1,
 				}
